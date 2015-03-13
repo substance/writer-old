@@ -37,25 +37,72 @@ Writer.Prototype = function() {
   };
 
   this.getInitialState = function() {
-    return {"id": "main", "contextId": "subjects"};
+    return {"id": "main", "contextId": "entities"};
   };
 
   this.transition = function(oldState, newState, cb) {
-    var panels = this.props.config.panels;
+    var extensions = this.props.config.extensions;
+
     var handled = false;
     // console.log('Writer.transition');
-    // this.handleWriterTransition
-    for (var i = 0; i < panels.length && !handled; i++) {
-      var panelClass = panels[i];
 
-      handled = panelClass.handleWriterTransition(this, oldState, newState, cb);
-      if (handled) {
-        console.log('HANDLED by', panelClass);
-      }
+    for (var i = 0; i < extensions.length && !handled; i++) {
+      var extension = extensions[i];
+      var transitions = extension.transitions;
+
+      // this.handleWriterTransition
+      for (var j = 0; j < transitions.length && !handled; j++) {
+        var transition = transitions[j];
+        handled = transition(this, oldState, newState, cb);
+        if (handled) {
+          console.log('transition handled by', extension.name, 'extension:', transition);
+        }
+      };
     };
 
-    // Let extensions handle state transitions
-    cb(null);
+    if (!handled) {
+      cb(null);
+    }
+  };
+
+  // Create a new panel 
+
+  this.createContextPanel = function() {
+    var extensions = this.props.config.extensions;
+    var contextId = this.state.contextId;
+    var panelClass = null;
+
+    for (var i = 0; i < extensions.length && !panelClass; i++) {
+      var extension = extensions[i];
+      var panels = extension.panels;
+
+      // this.handleWriterTransition
+      for (var j = 0; j < panels.length && !panelClass; j++) {
+        var panel = panels[j];
+        if (contextId === panel.contextId) {
+          panelClass = panel;
+        }
+      };
+    };
+
+    if (!panelClass) {
+      throw new Error("No panel found for ", contextId);
+    }
+
+    // Returns element defintion, including data pulled from reserved `panelData` data bucket
+    return $$(panelClass, this.panelData[contextId]);
+  };
+
+  
+  // Rendering
+  // ----------------
+
+  this.createContextToggles = function() {
+    return $$('div', {className: "contexts"},
+      // $$('a', {className: "toggle-context", href: "#", "data-id": "toc", text: "Contents"}),
+      $$('a', {className: "toggle-context", href: "#", "data-id": "subjects", text: "Subjects"}),
+      $$('a', {className: "toggle-context", href: "#", "data-id": "entities", text: "Entities"})
+    );
   };
 
   this.render = function() {
@@ -66,28 +113,10 @@ Writer.Prototype = function() {
       return $$('div', {text: "Loading contextual data..."});
     }
 
-    // if (this.state.contextId === "toc") {
-    //   contextPanel = $$('div', {text: "TOC_PANEL"});
-    // } else if (this.state.contextId === "entities") {
-    //   contextPanel = $$('div', {text: "ENTITIES_PANEL"});
-    // } else if (this.state.contextId === "subjects") {
-    //   contextPanel = $$('div', {text: "SUBJECTS PANEL"});
-    //   // contextPanelClass = this.app.getFactory("panel").create(this.state.contextId); // FACTORY METHOD!
-    // }
-
-    // Construct contextPanel based on current writer state
-    var contextPanel = this.props.config.createPanel(this);
-
-    console.log('contextPanel', contextPanel);
-
     return $$("div", {className: "writer-component"},
-      $$('div', {className: "contexts"},
-        $$('a', {className: "toggle-context", href: "#", "data-id": "toc", text: "Contents"}),
-        $$('a', {className: "toggle-context", href: "#", "data-id": "subjects", text: "Subjects"}),
-        $$('a', {className: "toggle-context", href: "#", "data-id": "entities", text: "Entities"})
-      ),
-      $$(ContentPanel, {doc: this.props.doc, ref: "contentpanel"})
-      // contextPanel
+      this.createContextToggles(),
+      $$(ContentPanel, {doc: this.props.doc, ref: "contentpanel"}),
+      this.createContextPanel(this) // Construct contextPanel based on current writer state
     );
   };
 };
