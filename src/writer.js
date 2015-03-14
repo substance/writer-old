@@ -13,14 +13,28 @@ var Writer = function(props) {
   Component.call(this, props);
 
   // A bucket for panel-related data
-  this.panelData = {
-    "entities": ["e1", "e2"],
-    "subjects": ["s1", "s2"]
-  };
+  this.panelData = {};
 };
 
 Writer.Prototype = function() {
-  
+
+  // Utils
+  // ----------------  
+
+  // Get all available tools from extensions
+  this.getTools = function() {
+    var extensions = this.props.config.extensions;
+    var tools = [];
+
+    for (var i = 0; i < extensions.length; i++) {
+      var ext = extensions[i];
+      if (ext.tools) {
+        tools = tools.concat(ext.tools);  
+      }
+    }
+    return tools;
+  };
+
   // Events
   // ----------------
 
@@ -40,6 +54,8 @@ Writer.Prototype = function() {
     return {"id": "main", "contextId": "entities"};
   };
 
+
+
   this.transition = function(oldState, newState, cb) {
     var extensions = this.props.config.extensions;
 
@@ -57,8 +73,8 @@ Writer.Prototype = function() {
         if (handled) {
           console.log('transition handled by', extension.name, 'extension:', transition);
         }
-      };
-    };
+      }
+    }
 
     if (!handled) {
       cb(null);
@@ -82,8 +98,8 @@ Writer.Prototype = function() {
         if (contextId === panel.contextId) {
           panelClass = panel;
         }
-      };
-    };
+      }
+    }
 
     if (!panelClass) {
       throw new Error("No panel found for ", contextId);
@@ -106,17 +122,19 @@ Writer.Prototype = function() {
   };
 
   this.render = function() {
-    var contextPanel;
-
-    // while initial transition is performed
+    // until initial transition is performed
     if (this.state.id === "uninitialized") {
-      return $$('div', {text: "Loading contextual data..."});
+      return $$('div', {text: ""});
     }
 
-    return $$("div", {className: "writer-component"},
-      this.createContextToggles(),
-      $$(ContentPanel, {doc: this.props.doc, ref: "contentpanel"}),
-      this.createContextPanel(this) // Construct contextPanel based on current writer state
+    return $$('div', {className: 'writer-component'},
+      $$('div', {className: "main-container"},
+        $$(ContentPanel, {writer: this, doc: this.props.doc, ref: "contentpanel"})
+      ),
+      $$('div', {className: "resource-container"},
+        this.createContextToggles(),
+        this.createContextPanel(this)
+      )
     );
   };
 };

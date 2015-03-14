@@ -3,8 +3,8 @@ var Component = Application.Component;
 var $$ = Application.$$;
 var _ = require("underscore");
 
-// Sub components
-var Paragraph = require("./nodes/paragraph");
+var ContentTools = require("./content_tools");
+var ContentEditor = require("./content_editor");
 
 // The Content Panel
 // ----------------
@@ -17,11 +17,9 @@ ContentPanel.Prototype = function() {
 
   this.render = function() {
     return $$("div", {className: "content-panel-component"},
-      $$("div", {className: "nodes"},
-        $$(Paragraph, {className: "paragraph", node: this.props.doc[0], ref: "p1"}),
-        $$(Paragraph, {className: "paragraph", node: this.props.doc[1], ref: "p2"}),
-        $$(Paragraph, {className: "paragraph", node: this.props.doc[2], ref: "p3"})
-      )
+      // Props are forwarded (doc, writer)
+      $$(ContentTools, this.props),
+      $$(ContentEditor, this.props)
     );
   };
 };
