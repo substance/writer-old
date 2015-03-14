@@ -3,7 +3,7 @@ var Component = Application.Component;
 var $$ = Application.$$;
 var _ = require("underscore");
 
-// Sub Components
+// Static sub components
 var ContentPanel = require("./content_panel");
 
 // The Writer Component
@@ -35,6 +35,17 @@ Writer.Prototype = function() {
     return tools;
   };
 
+  this.getPanels = function() {
+    var extensions = this.props.config.extensions;
+    var panels = [];
+
+    for (var i = 0; i < extensions.length; i++) {
+      var ext = extensions[i];
+      panels = panels.concat(ext.panels);
+    }
+    return panels;
+  };
+
   // Events
   // ----------------
 
@@ -54,8 +65,7 @@ Writer.Prototype = function() {
     return {"id": "main", "contextId": "entities"};
   };
 
-
-
+  // TODO: use getPanels() helper
   this.transition = function(oldState, newState, cb) {
     var extensions = this.props.config.extensions;
 
@@ -81,23 +91,18 @@ Writer.Prototype = function() {
     }
   };
 
-  // Create a new panel 
+  // Create a new panel based on current state
+  // ----------------
 
   this.createContextPanel = function() {
-    var extensions = this.props.config.extensions;
+    var panels = this.getPanels();
     var contextId = this.state.contextId;
     var panelClass = null;
 
-    for (var i = 0; i < extensions.length && !panelClass; i++) {
-      var extension = extensions[i];
-      var panels = extension.panels;
-
-      // this.handleWriterTransition
-      for (var j = 0; j < panels.length && !panelClass; j++) {
-        var panel = panels[j];
-        if (contextId === panel.contextId) {
-          panelClass = panel;
-        }
+    for (var i = 0; i < panels.length && !panelClass; i++) {
+      var panel = panels[i];
+      if (contextId === panel.contextId) {
+        panelClass = panel;
       }
     }
 
@@ -114,10 +119,25 @@ Writer.Prototype = function() {
   // ----------------
 
   this.createContextToggles = function() {
-    return $$('div', {className: "contexts"},
-      // $$('a', {className: "toggle-context", href: "#", "data-id": "toc", text: "Contents"}),
-      $$('a', {className: "toggle-context", href: "#", "data-id": "subjects", text: "Subjects"}),
-      $$('a', {className: "toggle-context", href: "#", "data-id": "entities", text: "Entities"})
+    var panels = this.getPanels();
+    var contextId = this.state.contextId;
+
+    var panelComps = panels.map(function(panelClass) {
+      var className = ["toggle-context"];
+      if (panelClass.contextId === contextId) {
+        className.push("active");
+      }
+
+      return $$('a', {
+        className: className.join(" "),
+        href: "#",
+        "data-id": panelClass.contextId,
+        html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.panelName
+      });
+    });
+
+    return $$('div', {className: "context-toggles"},
+      panelComps
     );
   };
 

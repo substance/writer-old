@@ -20,8 +20,6 @@ ContentTools.Prototype = function() {
       return $$(tool, props);
     });
 
-    console.log('toolcomps', toolComps);
-
     return $$("div", {className: "content-tools-component"},
       $$('div', {className: "tools"},
         toolComps
