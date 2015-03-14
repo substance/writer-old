@@ -3,23 +3,35 @@ var Component = Application.Component;
 var $$ = Application.$$;
 var _ = require("underscore");
 
+var TextNode = require("./nodes/text_node");
+
 // The Content Panel
 // ----------------
 
-var RichtextEditor = function(props) {
+var ContentEditor = function(props) {
   Component.call(this, props);
+  console.log('hey', props);
 };
 
-RichtextEditor.Prototype = function() {
+ContentEditor.Prototype = function() {
 
   this.render = function() {
-    return $$("div", {className: "richtext-editor-component"},
-      $$('div', {className: "nodes", text: "RICHEXT EDITOR"})
+  	var doc = this.props.doc;
+  	var contentNodes = doc.get("content").nodes;
+
+  	// console.log(contentNodes);
+  	var contentComps = contentNodes.map(function(nodeId) {
+  		var node = doc.get(nodeId);
+  		return $$(TextNode, {node: node});
+  	});
+
+    return $$("div", {className: "content-editor-component"},
+      $$('div', {className: "nodes"}, contentComps)
     );
   };
 };
 
-RichtextEditor.Prototype.prototype = Component.prototype;
-RichtextEditor.prototype = new RichtextEditor.Prototype();
+ContentEditor.Prototype.prototype = Component.prototype;
+ContentEditor.prototype = new ContentEditor.Prototype();
 
-module.exports = RichtextEditor;
+module.exports = ContentEditor;
