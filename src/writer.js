@@ -4,7 +4,10 @@ var $$ = Application.$$;
 var _ = require("underscore");
 
 // Static sub components
-var ContentPanel = require("./content_panel");
+
+var ContentTools = require("./content_tools");
+var ContentEditor = require("./content_editor");
+
 
 // The Writer Component
 // ----------------
@@ -35,6 +38,20 @@ Writer.Prototype = function() {
     return tools;
   };
 
+  this.getReferenceHandlers = function() {
+    var extensions = this.props.config.extensions;
+    var refHandlers = [];
+
+    for (var i = 0; i < extensions.length; i++) {
+      var ext = extensions[i];
+      if (ext.referenceHandler) {
+        refHandlers.push(ext.referenceHandler)
+      }
+    }
+
+    return refHandlers; 
+  };
+
   this.getPanels = function() {
     var extensions = this.props.config.extensions;
     var panels = [];
@@ -51,6 +68,9 @@ Writer.Prototype = function() {
 
   this.componentDidMount = function() {
     $(this.el).on('click', 'a.toggle-context', _.bind(this._toggleContext, this));
+
+    // This should go into the extension
+    $(this.el).on('click', '.content-editor-component .annotation', _.bind(this._toggleReference, this));
   };
 
   this._toggleContext = function(e) {
@@ -61,8 +81,40 @@ Writer.Prototype = function() {
     e.preventDefault();
   };
 
+  this._toggleReference = function(e) {
+    e.preventDefault();
+    var referenceId = $(e.currentTarget).attr("data-id");
+    var reference = this.props.doc.get(referenceId);
+    var newState = null;
+
+    var refHandlers = this.getReferenceHandlers();
+    for (var i = 0; i < refHandlers.length && !newState; i++) {
+      var handler = refHandlers[i];
+      newState = handler(this, reference);
+    };
+
+    if (newState) {
+      this.setState(newState);  
+    } else {
+      console.error("this reference type could not be handled:", reference.type);
+    }
+  };
+
+  // Tools and panels can request context switches on writer level
+  // E.g. when a new a new entity should be tagged we would go into the state
+  // contextId: "tagentity"
+  this.handleContextSwitch = function(contextId) {
+    console.log('switching state', contextId);
+    this.setState({
+      contextId: contextId
+    });
+  };
+
+  // State transition stuff
+  // ----------------
+
   this.getInitialState = function() {
-    return {"id": "main", "contextId": "entities"};
+    return {"id": "main", "contextId": "subjects"};
   };
 
   // TODO: use getPanels() helper
@@ -91,6 +143,36 @@ Writer.Prototype = function() {
     }
   };
 
+  
+  // Rendering
+  // ----------------
+
+  this.createContextToggles = function() {
+    var panels = this.getPanels();
+    var contextId = this.state.contextId;
+
+    var panelComps = panels.map(function(panelClass) {
+      // We don't show dialogs here
+      if (panelClass.isDialog) return null;
+
+      var className = ["toggle-context"];
+      if (panelClass.contextId === contextId) {
+        className.push("active");
+      }
+
+      return $$('a', {
+        className: className.join(" "),
+        href: "#",
+        "data-id": panelClass.contextId,
+        html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.panelName
+      });
+    });
+
+    return $$('div', {className: "context-toggles"},
+      _.compact(panelComps)
+    );
+  };
+
   // Create a new panel based on current state
   // ----------------
 
@@ -114,32 +196,6 @@ Writer.Prototype = function() {
     return $$(panelClass, this.panelData[contextId]);
   };
 
-  
-  // Rendering
-  // ----------------
-
-  this.createContextToggles = function() {
-    var panels = this.getPanels();
-    var contextId = this.state.contextId;
-
-    var panelComps = panels.map(function(panelClass) {
-      var className = ["toggle-context"];
-      if (panelClass.contextId === contextId) {
-        className.push("active");
-      }
-
-      return $$('a', {
-        className: className.join(" "),
-        href: "#",
-        "data-id": panelClass.contextId,
-        html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.panelName
-      });
-    });
-
-    return $$('div', {className: "context-toggles"},
-      panelComps
-    );
-  };
 
   this.render = function() {
     // until initial transition is performed
@@ -149,7 +205,17 @@ Writer.Prototype = function() {
 
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
-        $$(ContentPanel, {writer: this, doc: this.props.doc, ref: "contentpanel"})
+        $$(ContentTools, {
+          writer: this,
+          doc: this.props.doc,
+          ref: "contenttools",
+          switchContext: _.bind(this.handleContextSwitch, this)
+        }),
+        $$(ContentEditor, {
+          writer: this,
+          doc: this.props.doc,
+          ref: "contenteditor"
+        })
       ),
       $$('div', {className: "resource-container"},
         this.createContextToggles(),

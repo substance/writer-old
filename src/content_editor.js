@@ -10,7 +10,6 @@ var TextNode = require("./nodes/text_node");
 
 var ContentEditor = function(props) {
   Component.call(this, props);
-  console.log('hey', props);
 };
 
 ContentEditor.Prototype = function() {
@@ -19,7 +18,6 @@ ContentEditor.Prototype = function() {
   	var doc = this.props.doc;
   	var contentNodes = doc.get("content").nodes;
 
-  	// console.log(contentNodes);
   	var contentComps = contentNodes.map(function(nodeId) {
   		var node = doc.get(nodeId);
   		return $$(TextNode, {node: node});
