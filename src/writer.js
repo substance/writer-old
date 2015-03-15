@@ -93,6 +93,7 @@ Writer.Prototype = function() {
       newState = handler(this, reference);
     };
 
+    console.log('toggle reference', newState);
     if (newState) {
       this.setState(newState);  
     } else {
@@ -120,9 +121,7 @@ Writer.Prototype = function() {
   // TODO: use getPanels() helper
   this.transition = function(oldState, newState, cb) {
     var extensions = this.props.config.extensions;
-
     var handled = false;
-    // console.log('Writer.transition');
 
     for (var i = 0; i < extensions.length && !handled; i++) {
       var extension = extensions[i];
@@ -132,9 +131,9 @@ Writer.Prototype = function() {
       for (var j = 0; j < transitions.length && !handled; j++) {
         var transition = transitions[j];
         handled = transition(this, oldState, newState, cb);
-        if (handled) {
-          console.log('transition handled by', extension.name, 'extension:', transition);
-        }
+        // if (handled) {
+        //   console.log('transition handled by', extension.name, 'extension:', transition);
+        // }
       }
     }
 
