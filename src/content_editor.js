@@ -10,6 +10,7 @@ var TextNode = require("./nodes/text_node");
 
 var ContentEditor = function(props) {
   Component.call(this, props);
+
 };
 
 ContentEditor.Prototype = function() {

@@ -8,7 +8,6 @@ var _ = require("underscore");
 var ContentTools = require("./content_tools");
 var ContentEditor = require("./content_editor");
 
-
 // The Writer Component
 // ----------------
 
@@ -195,12 +194,12 @@ Writer.Prototype = function() {
     return $$(panelClass, this.panelData[contextId]);
   };
 
+  this.renderUninitialized = function() {
+    // return $$('div', {text: "loading context data"});
+    return $$('div', {text: "loading context data"});
+  };
 
   this.render = function() {
-    // until initial transition is performed
-    if (this.state.id === "uninitialized") {
-      return $$('div', {text: ""});
-    }
 
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
