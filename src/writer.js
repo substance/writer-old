@@ -14,6 +14,7 @@ var ContentEditor = require("./content_editor");
 var Writer = function(props) {
   Component.call(this, props);
 
+  console.log('creating writer');
   // A bucket for panel-related data
   this.panelData = {};
 };
@@ -69,7 +70,7 @@ Writer.Prototype = function() {
     $(this.el).on('click', 'a.toggle-context', _.bind(this._toggleContext, this));
 
     // This should go into the extension
-    $(this.el).on('click', '.content-editor-component .annotation', _.bind(this._toggleReference, this));
+    $(this.el).on('click', '.annotation', _.bind(this._toggleReference, this));
   };
 
   this._toggleContext = function(e) {
@@ -203,7 +204,6 @@ Writer.Prototype = function() {
   };
 
   this.render = function() {
-
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
         $$(ContentTools, {
