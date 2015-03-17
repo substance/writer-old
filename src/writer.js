@@ -114,7 +114,7 @@ Writer.Prototype = function() {
   // ----------------
 
   this.getInitialState = function() {
-    return {"id": "main", "contextId": "entities"};
+    return {"id": "main", "contextId": "subjects"};
   };
 
   // TODO: use getPanels() helper
@@ -190,12 +190,15 @@ Writer.Prototype = function() {
       throw new Error("No panel found for ", contextId);
     }
 
+    // Let the panel create an element, where props are derived from
+    // writer state
+    return panelClass.create(this);
+
     // Returns element defintion, including data pulled from reserved `panelData` data bucket
-    return $$(panelClass, this.panelData[contextId]);
+    // return $$(panelClass, this.panelData[contextId]);
   };
 
   this.renderUninitialized = function() {
-    // return $$('div', {text: "loading context data"});
     return $$('div', {text: "loading context data"});
   };
 
