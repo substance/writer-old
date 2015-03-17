@@ -1,25 +1,26 @@
 var Application = require("substance-application");
-var Component = Application.Component;
+var NodeComponent = require('./node');
 var $$ = Application.$$;
 var _ = require("underscore");
 
 // TextNode
 // ----------------
-// 
+//
 // This should go into an extension too
 
 var TextNode = function(props) {
-  Component.call(this, props);
+  NodeComponent.call(this, props);
 };
 
 TextNode.Prototype = function() {
 
   this.render = function() {
-    return $$("div", {className: "content-node text", html: this.props.node.content});
+    return $$("div", {className: "content-node text", html: this.getNode().content});
   };
+
 };
 
-TextNode.Prototype.prototype = Component.prototype;
+TextNode.Prototype.prototype = NodeComponent.prototype;
 TextNode.prototype = new TextNode.Prototype();
 
 module.exports = TextNode;

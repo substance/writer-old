@@ -21,7 +21,7 @@ var Writer = function(props) {
 Writer.Prototype = function() {
 
   // Utils
-  // ----------------  
+  // ----------------
 
   // Get all available tools from extensions
   this.getTools = function() {
@@ -31,7 +31,7 @@ Writer.Prototype = function() {
     for (var i = 0; i < extensions.length; i++) {
       var ext = extensions[i];
       if (ext.tools) {
-        tools = tools.concat(ext.tools);  
+        tools = tools.concat(ext.tools);
       }
     }
     return tools;
@@ -48,7 +48,7 @@ Writer.Prototype = function() {
       }
     }
 
-    return refHandlers; 
+    return refHandlers;
   };
 
   this.getPanels = function() {
@@ -94,7 +94,7 @@ Writer.Prototype = function() {
 
     console.log('toggle reference', newState);
     if (newState) {
-      this.setState(newState);  
+      this.setState(newState);
     } else {
       console.error("this reference type could not be handled:", reference.type);
     }
@@ -141,7 +141,7 @@ Writer.Prototype = function() {
     }
   };
 
-  
+
   // Rendering
   // ----------------
 
@@ -212,6 +212,7 @@ Writer.Prototype = function() {
         $$(ContentEditor, {
           writer: this,
           doc: this.props.doc,
+          name: 'content',
           ref: "contenteditor"
         })
       ),

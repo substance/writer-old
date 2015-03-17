@@ -1,36 +1,21 @@
 var Application = require("substance-application");
-var Component = Application.Component;
+var ContainerComponent = require('./nodes/container_node');
 var $$ = Application.$$;
 var _ = require("underscore");
 
 var TextNode = require("./nodes/text_node");
 
-// The Content Panel
+// The Content Editor
 // ----------------
 
 var ContentEditor = function(props) {
-  Component.call(this, props);
-
+  ContainerComponent.call(this, props);
 };
 
 ContentEditor.Prototype = function() {
-
-  this.render = function() {
-  	var doc = this.props.doc;
-  	var contentNodes = doc.get("content").nodes;
-
-  	var contentComps = contentNodes.map(function(nodeId) {
-  		var node = doc.get(nodeId);
-  		return $$(TextNode, {node: node});
-  	});
-
-    return $$("div", {className: "content-editor-component"},
-      $$('div', {className: "nodes"}, contentComps)
-    );
-  };
 };
 
-ContentEditor.Prototype.prototype = Component.prototype;
+ContentEditor.Prototype.prototype = ContainerComponent.prototype;
 ContentEditor.prototype = new ContentEditor.Prototype();
 
 module.exports = ContentEditor;
