@@ -13,8 +13,9 @@ var ContentEditor = function(props) {
 };
 
 ContentEditor.Prototype = function() {
-  this.checkDirty = function(oldProps, props) {
-    // never re-render for now ;)
+  this.shouldComponentUpdate = function(nextProps, nextState) {
+    // never re-render for now
+    // editor receives updates by binding to document operations
     return false;
   };
 };

@@ -13,7 +13,7 @@ var ContentTools = function(props) {
 ContentTools.Prototype = function() {
 
   // Returns true when properties have changed and re-render is needed
-  this.checkDirty = function(oldProps, props) {
+  this.shouldComponentUpdate = function(nextProps, nextState) {
     // never re-render for now ;)
     return false;
   };

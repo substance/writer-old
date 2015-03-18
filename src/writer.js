@@ -114,7 +114,7 @@ Writer.Prototype = function() {
   // ----------------
 
   this.getInitialState = function() {
-    return {"id": "main", "contextId": "subjects"};
+    return {"id": "main", "contextId": "entities"};
   };
 
   // TODO: use getPanels() helper
