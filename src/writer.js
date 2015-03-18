@@ -62,6 +62,18 @@ Writer.Prototype = function() {
     return panels;
   };
 
+
+  // Routing
+  // ----------------
+
+  this.stateToRoute = function() {
+    return this.state;
+  };
+
+  this.stateFromRoute = function(compRoute) {
+    return this.compRoute;
+  };
+
   // Events
   // ----------------
 
@@ -104,42 +116,42 @@ Writer.Prototype = function() {
   // E.g. when a new a new entity should be tagged we would go into the state
   // contextId: "tagentity"
   this.handleContextSwitch = function(contextId) {
-    console.log('switching state', contextId);
     this.setState({
       contextId: contextId
     });
   };
 
+
   // State transition stuff
   // ----------------
 
   this.getInitialState = function() {
-    return {"id": "main", "contextId": "entities"};
+    return {"contextId": "entities"};
   };
 
   // TODO: use getPanels() helper
-  this.transition = function(oldState, newState, cb) {
-    var extensions = this.props.config.extensions;
-    var handled = false;
+  // this.transition = function(oldState, newState, cb) {
+  //   var extensions = this.props.config.extensions;
+  //   var handled = false;
 
-    for (var i = 0; i < extensions.length && !handled; i++) {
-      var extension = extensions[i];
-      var transitions = extension.transitions;
+  //   for (var i = 0; i < extensions.length && !handled; i++) {
+  //     var extension = extensions[i];
+  //     var transitions = extension.transitions;
 
-      // this.handleWriterTransition
-      for (var j = 0; j < transitions.length && !handled; j++) {
-        var transition = transitions[j];
-        handled = transition(this, oldState, newState, cb);
-        // if (handled) {
-        //   console.log('transition handled by', extension.name, 'extension:', transition);
-        // }
-      }
-    }
+  //     // this.handleWriterTransition
+  //     for (var j = 0; j < transitions.length && !handled; j++) {
+  //       var transition = transitions[j];
+  //       handled = transition(this, oldState, newState, cb);
+  //       // if (handled) {
+  //       //   console.log('transition handled by', extension.name, 'extension:', transition);
+  //       // }
+  //     }
+  //   }
 
-    if (!handled) {
-      cb(null);
-    }
-  };
+  //   if (!handled) {
+  //     cb(null);
+  //   }
+  // };
 
   // Rendering
   // ----------------
@@ -192,25 +204,18 @@ Writer.Prototype = function() {
     // Let the panel create an element, where props are derived from
     // writer state
     return panelClass.create(this);
-
-    // Returns element defintion, including data pulled from reserved `panelData` data bucket
-    // return $$(panelClass, this.panelData[contextId]);
   };
-
-  // this.renderUninitialized = function() {
-  //   return $$('div', {text: "loading context data"});
-  // };
 
   this.render = function() {
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
-        $$(ContentTools, {
+        $$(ContentTools, { // will be reused
           writer: this,
           doc: this.props.doc,
           id: "content-tools",
           switchContext: _.bind(this.handleContextSwitch, this)
         }),
-        $$(ContentEditor, {
+        $$(ContentEditor, { // will be reused
           writer: this,
           doc: this.props.doc,
           name: 'content',
@@ -219,7 +224,7 @@ Writer.Prototype = function() {
       ),
       $$('div', {className: "resource-container"},
         this.createContextToggles(),
-        this.createContextPanel(this)
+        this.createContextPanel(this) // will be possibly recycled
       )
     );
   };
