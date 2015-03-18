@@ -12,9 +12,19 @@ var ContentTools = function(props) {
 
 ContentTools.Prototype = function() {
 
+  // Returns true when properties have changed and re-render is needed
+  this.checkDirty = function(oldProps, props) {
+    // never re-render for now ;)
+    return false;
+  };
+
   this.render = function() {
     var tools = this.props.writer.getTools();
-    var props = this.props;
+    var props = {
+      writer: this.props.writer,
+      doc: this.props.doc,
+      switchContext: this.props.switchContext
+    };
 
     var toolComps = tools.map(function(tool, index) {
       return $$(tool, props);
@@ -27,6 +37,8 @@ ContentTools.Prototype = function() {
     );
   };
 };
+
+ContentTools.persistent = true;
 
 ContentTools.Prototype.prototype = Component.prototype;
 ContentTools.prototype = new ContentTools.Prototype();

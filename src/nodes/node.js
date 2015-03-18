@@ -4,9 +4,6 @@ var $$ = Application.$$;
 
 var Node = function(props) {
   Component.call(this, props);
-  if (!props.doc || !props.node) {
-    throw new Error('Illegal arguments: need "doc" and "node"');
-  }
 };
 
 Node.Prototype = function() {
@@ -16,9 +13,9 @@ Node.Prototype = function() {
   };
 
   this.getNode = function() {
+    console.log('getting node', this.props);
     return this.props.node;
   };
-
 };
 
 Node.Prototype.prototype = Component.prototype;

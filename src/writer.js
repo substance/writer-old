@@ -14,7 +14,6 @@ var ContentEditor = require("./content_editor");
 var Writer = function(props) {
   Component.call(this, props);
 
-  console.log('creating writer');
   // A bucket for panel-related data
   this.panelData = {};
 };
@@ -142,7 +141,6 @@ Writer.Prototype = function() {
     }
   };
 
-
   // Rendering
   // ----------------
 
@@ -199,9 +197,9 @@ Writer.Prototype = function() {
     // return $$(panelClass, this.panelData[contextId]);
   };
 
-  this.renderUninitialized = function() {
-    return $$('div', {text: "loading context data"});
-  };
+  // this.renderUninitialized = function() {
+  //   return $$('div', {text: "loading context data"});
+  // };
 
   this.render = function() {
     return $$('div', {className: 'writer-component'},
@@ -209,14 +207,14 @@ Writer.Prototype = function() {
         $$(ContentTools, {
           writer: this,
           doc: this.props.doc,
-          ref: "contenttools",
+          id: "content-tools",
           switchContext: _.bind(this.handleContextSwitch, this)
         }),
         $$(ContentEditor, {
           writer: this,
           doc: this.props.doc,
           name: 'content',
-          ref: "contenteditor"
+          id: "content-editor"
         })
       ),
       $$('div', {className: "resource-container"},

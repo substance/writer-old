@@ -13,7 +13,14 @@ var ContentEditor = function(props) {
 };
 
 ContentEditor.Prototype = function() {
+  this.checkDirty = function(oldProps, props) {
+    // never re-render for now ;)
+    return false;
+  };
 };
+
+ContentEditor.persistent = true;
+
 
 ContentEditor.Prototype.prototype = ContainerComponent.prototype;
 ContentEditor.prototype = new ContentEditor.Prototype();
