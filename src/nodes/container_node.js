@@ -31,7 +31,6 @@ ContainerNode.Prototype = function() {
       return $$(ComponentClass, {doc: doc, node: node});
     });
     
-
     return $$("div", {className: "container-node " + this.props.name},
       $$('div', {className: "nodes"}, components)
     );

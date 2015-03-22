@@ -13,7 +13,6 @@ Node.Prototype = function() {
   };
 
   this.getNode = function() {
-    console.log('getting node', this.props);
     return this.props.node;
   };
 };

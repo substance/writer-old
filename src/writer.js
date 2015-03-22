@@ -4,9 +4,9 @@ var $$ = Application.$$;
 var _ = require("underscore");
 
 // Static sub components
-
 var ContentTools = require("./content_tools");
-var ContentEditor = require("./content_editor");
+var ContentPanel = require("./content_panel");
+
 
 // The Writer Component
 // ----------------
@@ -215,11 +215,10 @@ Writer.Prototype = function() {
           id: "content-tools",
           switchContext: _.bind(this.handleContextSwitch, this)
         }),
-        $$(ContentEditor, { // will be reused
+        $$(ContentPanel, {
           writer: this,
           doc: this.props.doc,
-          name: 'content',
-          id: "content-editor"
+          id: 'content-panel'
         })
       ),
       $$('div', {className: "resource-container"},
