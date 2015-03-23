@@ -36,10 +36,12 @@ var Scrollbar = function(props) {
 
 Scrollbar.Prototype = function() {
 
+  this.events = {
+    'mousedown': 'mouseDown'
+  };
+
 	this.componentDidMount = function() {
-    // Use refs instead of manually pulling out
-    this.thumbEl = $(this.el).find('.thumb')[0];
-    $(this.el).mousedown(this.mouseDown);
+    // $(this.el).mousedown(this.mouseDown);
     // globals!
     $(window).mousemove(this.mouseMove);
     $(window).mouseup(this.mouseUp);
@@ -50,13 +52,14 @@ Scrollbar.Prototype = function() {
     this._mouseDown = true;
     var scrollBarOffset = $(this.el).offset().top;
     var y = e.pageY - scrollBarOffset;
+    var thumbEl = this.refs.thumb;
 
-    if (e.target !== this.thumbEl) {
+    if (e.target !== thumbEl) {
       // Jump to mousedown position
-      this.offset = $(this.thumbEl).height()/2;
+      this.offset = $(thumbEl).height()/2;
       this.mouseMove(e);
     } else {
-      this.offset = y - $(this.thumbEl).position().top;
+      this.offset = y - $(thumbEl).position().top;
     }
     return false;
   };
@@ -85,6 +88,10 @@ Scrollbar.Prototype = function() {
       var scroll = (y-this.offset)*this.factor;
       this.scrollTop = $(this.panelContentEl).scrollTop(scroll);
     }
+  };
+
+  this.componentDidRender = function() {
+    console.log('Scrollbar did render');
   };
 
   // Update scrollbar
@@ -155,6 +162,7 @@ Scrollbar.Prototype = function() {
   	});
 
   	var thumbEl = $$('div', {
+      ref: "thumb",
   		className: "thumb",
   		style: "top:"+ this.state.thumb.top +"px; height: "+this.state.thumb.height+"px;"
   	});
@@ -169,7 +177,6 @@ Scrollbar.Prototype = function() {
 };
 
 Scrollbar.persistent = true;
-
 Scrollbar.overlayMinHeight = 5;
 
 Scrollbar.Prototype.prototype = Component.prototype;

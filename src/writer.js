@@ -78,11 +78,22 @@ Writer.Prototype = function() {
   // ----------------
 
   this.componentDidMount = function() {
-    $(this.el).on('click', 'a.toggle-context', _.bind(this._toggleContext, this));
-
-    // This should go into the extension
-    $(this.el).on('click', '.annotation', _.bind(this._toggleReference, this));
+    // console.log('writer mounted');
+    // $(this.el).on('click', 'a.toggle-context', _.bind(this._toggleContext, this));
+    // // This should go into the extension
+    // $(this.el).on('click', '.annotation', _.bind(this._toggleReference, this));
   };
+  
+  // Specify events in a declarative way
+  this.events = {
+    'click a.toggle-context': '_toggleContext',
+    'click .annotation': '_toggleReference'
+  };
+
+  this.componentDidUpdate = function() {
+    // console.log('writer updated');
+  };
+
 
   this._toggleContext = function(e) {
     var newContext = $(e.currentTarget).attr("data-id");
@@ -104,7 +115,7 @@ Writer.Prototype = function() {
       newState = handler(this, reference);
     };
 
-    console.log('toggle reference', newState);
+    // console.log('toggle reference', newState);
     if (newState) {
       this.setState(newState);
     } else {

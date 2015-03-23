@@ -15,15 +15,33 @@ var ContentPanel = function(props) {
 
 ContentPanel.Prototype = function() {
 
+  this.events = {
+    // "scroll .panel-content": "_onScroll",
+    "scroll .panel-content": "_onScroll"
+  };
+
+  this._onScroll = function(e) {
+    console.log('panel scroll');
+  };
+
+  // $(self.panelContentEl).on('scroll', _.bind(self.update, self));
+
   // Returns true when properties have changed and re-render is needed
   this.shouldComponentUpdate = function(nextProps, nextState) {
     // always re-render for now
     // TODO: make smarter
-    return true;
+    return false;
+  };
+
+  // Since this component gets only rendered once we can easily bind to this.refs.panelContent
+  this.componentDidRender = function() {
+    console.log('ContentPanel did render', this.refs.panelContent);
+    
+    // self.panelContentEl = $(self.props.panel.el).find('.panel-content')[0];
   };
 
   this.componentDidMount = function() {
-
+    // self.panelContentEl = $(self.props.panel.el).find('.panel-content')[0];
   };
 
   // Based on a certain writer state, determine what should be
@@ -45,9 +63,10 @@ ContentPanel.Prototype = function() {
       $$(Scrollbar, {
         id: "content-scrollbar",
         highlights: this.getHighlightedNodes(),
+        ref: "scrollbar",
         panel: this // scrollbar needs to read from panel
       }),
-      $$('div', {className: "panel-content"}, // requires absolute positioning, overflow=auto
+      $$('div', {className: "panel-content", ref: "panelContent"}, // requires absolute positioning, overflow=auto
         $$(ContentEditor, {
           writer: this.props.writer,
           doc: this.props.doc,
