@@ -15,33 +15,32 @@ var ContentPanel = function(props) {
 
 ContentPanel.Prototype = function() {
 
-  this.events = {
-    // "scroll .panel-content": "_onScroll",
-    "scroll .panel-content": "_onScroll"
-  };
-
-  this._onScroll = function(e) {
-    console.log('panel scroll');
-  };
-
-  // $(self.panelContentEl).on('scroll', _.bind(self.update, self));
-
   // Returns true when properties have changed and re-render is needed
   this.shouldComponentUpdate = function(nextProps, nextState) {
     // always re-render for now
     // TODO: make smarter
-    return false;
+    console.log('ContentPanelShouldUpdate');
+    return true;
   };
 
-  // Since this component gets only rendered once we can easily bind to this.refs.panelContent
+  // Since component gets rendered multiple times we need to update
+  // the scrollbar and reattach the scroll event
   this.componentDidRender = function() {
-    console.log('ContentPanel did render', this.refs.panelContent);
-    
-    // self.panelContentEl = $(self.props.panel.el).find('.panel-content')[0];
+    var scrollbar = this.refs.scrollbar;
+    var panelContentEl = this.refs.panelContent;
+
+    // We need to await next repaint, otherwise dimensions will be wrong
+    _.delay(function() {
+      scrollbar.update(panelContentEl);  
+    },0);
+
+    // Bind scroll event on new panelContentEl
+    $(panelContentEl).on('scroll', _.bind(this._onScroll, this));
   };
 
-  this.componentDidMount = function() {
-    // self.panelContentEl = $(self.props.panel.el).find('.panel-content')[0];
+  this._onScroll = function(e) {
+    var panelContentEl = this.refs.panelContent;
+    this.refs.scrollbar.update(panelContentEl);
   };
 
   // Based on a certain writer state, determine what should be
@@ -50,15 +49,31 @@ ContentPanel.Prototype = function() {
   // general way of determining the highlights
 
   this.getHighlightedNodes = function() {
-    // one specific example implemenation
-    // var entityId = this.props.writer.state.entityId;
-    // return doc.getIndex('references').get(entityId);
-    return ["subject_reference_1", "subject_reference_2"];
-  },
+    var doc = this.props.doc;
+    var writerState = this.props.writer.state
+
+    // This needs to be passed as a prop!
+    var target = writerState.entityId || writerState.subjectId;
+
+    var references = [];
+    if (target) {
+      // Get references for a particular target
+      references = Object.keys(doc.references.get(target));
+    }
+    return references;
+  };
+
+  // Incremental updates instead of rerendering
+  // e.g. when highlighted nodes have changed, update the scrollbar
+  // this.update = function() {
+
+  // };
 
   // This is the default rendering of a panel
   // Custom panels must have the exact same structure
   this.render = function() {
+    console.log('CONTENTPANEL.render called');
+
     return $$("div", {className: "panel content-panel-component"}, // usually absolutely positioned
       $$(Scrollbar, {
         id: "content-scrollbar",
@@ -79,7 +94,7 @@ ContentPanel.Prototype = function() {
 };
 
 // Should a panel be persistent by default?
-Panel.persistent = true;
+ContentPanel.persistent = true;
 
 ContentPanel.Prototype.prototype = Panel.prototype;
 ContentPanel.prototype = new ContentPanel.Prototype();

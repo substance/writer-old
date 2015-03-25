@@ -25,13 +25,13 @@ var Scrollbar = function(props) {
   // })
   
   // Initialization
-	_.delay(function() {
-		self.panelContentEl = $(self.props.panel.el).find('.panel-content')[0];
+	// _.delay(function() {
+	// 	self.panelContentEl = $(self.props.panel.el).find('.panel-content')[0];
 
-    // Trigger update each time a scroll happens
-		$(self.panelContentEl).on('scroll', _.bind(self.update, self));
-		self.update();
-	}, 0);
+ //    // Trigger update each time a scroll happens
+	// 	$(self.panelContentEl).on('scroll', _.bind(self.update, self));
+	// 	self.update();
+	// }, 0);
 };
 
 Scrollbar.Prototype = function() {
@@ -41,8 +41,7 @@ Scrollbar.Prototype = function() {
   };
 
 	this.componentDidMount = function() {
-    // $(this.el).mousedown(this.mouseDown);
-    // globals!
+    // HACK global window object!
     $(window).mousemove(this.mouseMove);
     $(window).mouseup(this.mouseUp);
 	};
@@ -91,7 +90,7 @@ Scrollbar.Prototype = function() {
   };
 
   this.componentDidRender = function() {
-    console.log('Scrollbar did render');
+    
   };
 
   // Update scrollbar
@@ -100,9 +99,10 @@ Scrollbar.Prototype = function() {
 	// From the current rendering of .panel .panel-content derive state object
 	// that is used for rendering the scrollbar
 
-	this.update = function() {
+	this.update = function(panelContentEl) {
 		var self = this;
 
+    this.panelContentEl = panelContentEl;
     // initialized lazily as this element is not accessible earlier (e.g. during construction)
     // get the new dimensions
     // TODO: use outerheight for contentheight determination?

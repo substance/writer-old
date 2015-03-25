@@ -44,7 +44,7 @@ Writer.Prototype = function() {
     for (var i = 0; i < extensions.length; i++) {
       var ext = extensions[i];
       if (ext.referenceHandler) {
-        refHandlers.push(ext.referenceHandler)
+        refHandlers.push(ext.referenceHandler);
       }
     }
 
@@ -71,7 +71,7 @@ Writer.Prototype = function() {
   };
 
   this.stateFromRoute = function(compRoute) {
-    return this.compRoute;
+    return compRoute;
   };
 
   // Events
@@ -79,9 +79,6 @@ Writer.Prototype = function() {
 
   this.componentDidMount = function() {
     // console.log('writer mounted');
-    // $(this.el).on('click', 'a.toggle-context', _.bind(this._toggleContext, this));
-    // // This should go into the extension
-    // $(this.el).on('click', '.annotation', _.bind(this._toggleReference, this));
   };
   
   // Specify events in a declarative way
@@ -113,7 +110,7 @@ Writer.Prototype = function() {
     for (var i = 0; i < refHandlers.length && !newState; i++) {
       var handler = refHandlers[i];
       newState = handler(this, reference);
-    };
+    }
 
     // console.log('toggle reference', newState);
     if (newState) {
@@ -217,6 +214,8 @@ Writer.Prototype = function() {
     return panelClass.create(this);
   };
 
+
+
   this.render = function() {
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
@@ -234,7 +233,7 @@ Writer.Prototype = function() {
       ),
       $$('div', {className: "resource-container"},
         this.createContextToggles(),
-        this.createContextPanel(this) // will be possibly recycled
+        this.createContextPanel(this) // will be possibly be recycled
       )
     );
   };

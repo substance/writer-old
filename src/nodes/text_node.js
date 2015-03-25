@@ -15,7 +15,7 @@ var TextNode = function(props) {
 TextNode.Prototype = function() {
 
   this.render = function() {
-    return $$("div", {className: "content-node text", html: this.getNode().content});
+    return $$("div", {contenteditable: true, className: "content-node text", html: this.getNode().content});
   };
 
 };
