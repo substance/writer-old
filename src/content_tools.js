@@ -1,24 +1,15 @@
 var Application = require("substance-application");
 var Component = Application.Component;
-var $$ = Application.$$;
+var $$ = React.createElement;
+
 var _ = require("underscore");
 
 // The Content Panel
 // ----------------
 
-var ContentTools = function(props) {
-  Component.call(this, props);
-};
-
-ContentTools.Prototype = function() {
-
-  // Returns true when properties have changed and re-render is needed
-  this.shouldComponentUpdate = function(nextProps, nextState) {
-    // never re-render for now ;)
-    return false;
-  };
-
-  this.render = function() {
+var ContentTools = React.createClass({
+  displayName: "ContentTools",
+  render: function() {
     var tools = this.props.writer.getTools();
     var props = {
       writer: this.props.writer,
@@ -27,6 +18,7 @@ ContentTools.Prototype = function() {
     };
 
     var toolComps = tools.map(function(tool, index) {
+      props.key = index+"222";
       return $$(tool, props);
     });
 
@@ -35,12 +27,7 @@ ContentTools.Prototype = function() {
         toolComps
       )
     );
-  };
-};
-
-ContentTools.persistent = true;
-
-ContentTools.Prototype.prototype = Component.prototype;
-ContentTools.prototype = new ContentTools.Prototype();
+  }
+});
 
 module.exports = ContentTools;

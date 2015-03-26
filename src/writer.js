@@ -1,6 +1,4 @@
-var Application = require("substance-application");
-var Component = Application.Component;
-var $$ = Application.$$;
+var $$ = React.createElement;
 var _ = require("underscore");
 
 // Static sub components
@@ -8,23 +6,38 @@ var ContentTools = require("./content_tools");
 var ContentPanel = require("./content_panel");
 
 
-// The Writer Component
+// The Substance Writer Component
 // ----------------
 
-var Writer = function(props) {
-  Component.call(this, props);
+var Writer = React.createClass({
+  displayName: "Writer",
 
-  // A bucket for panel-related data
-  this.panelData = {};
-};
+  getNodeComponentClass: function(nodeType) {
+    var extensions = this.props.config.extensions;
+    var NodeClass;
 
-Writer.Prototype = function() {
+    for (var i = 0; i < extensions.length; i++) {
+      var ext = extensions[i];
+      if (ext.nodes[nodeType]) NodeClass = ext.nodes[nodeType];
+    }
 
-  // Utils
-  // ----------------
+    if (!NodeClass) throw new Error("No component found for "+nodeType);
+    return NodeClass;
+  },
+
+  getPanels: function() {
+    var extensions = this.props.config.extensions;
+    var panels = [];
+
+    for (var i = 0; i < extensions.length; i++) {
+      var ext = extensions[i];
+      panels = panels.concat(ext.panels);
+    }
+    return panels;
+  },
 
   // Get all available tools from extensions
-  this.getTools = function() {
+  getTools: function() {
     var extensions = this.props.config.extensions;
     var tools = [];
 
@@ -35,9 +48,10 @@ Writer.Prototype = function() {
       }
     }
     return tools;
-  };
+  },
 
-  this.getReferenceHandlers = function() {
+
+  getReferenceHandlers: function() {
     var extensions = this.props.config.extensions;
     var refHandlers = [];
 
@@ -49,59 +63,39 @@ Writer.Prototype = function() {
     }
 
     return refHandlers;
-  };
-
-  this.getPanels = function() {
-    var extensions = this.props.config.extensions;
-    var panels = [];
-
-    for (var i = 0; i < extensions.length; i++) {
-      var ext = extensions[i];
-      panels = panels.concat(ext.panels);
-    }
-    return panels;
-  };
+  },
 
 
-  // Routing
-  // ----------------
-
-  this.stateToRoute = function() {
-    return this.state;
-  };
-
-  this.stateFromRoute = function(compRoute) {
-    return compRoute;
-  };
+  getInitialState: function() {
+    return {"contextId": "subjects", "subjectId": "54bae4cda868bc6fab4bcd0e"};
+  },
 
   // Events
   // ----------------
 
-  this.componentDidMount = function() {
-    // console.log('writer mounted');
-  };
-  
-  // Specify events in a declarative way
-  this.events = {
-    'click a.toggle-context': '_toggleContext',
-    'click .annotation': '_toggleReference'
-  };
+  componentDidMount: function() {
+    // 'click .annotation': '_toggleReference'
+    $(this.getDOMNode()).on('click', '.annotation', this.handleReferenceToggle);
+  },
 
-  this.componentDidUpdate = function() {
-    // console.log('writer updated');
-  };
-
-
-  this._toggleContext = function(e) {
-    var newContext = $(e.currentTarget).attr("data-id");
-    this.setState({
-      contextId: newContext
+  // E.g. when a tool requests a context switch
+  handleContextSwitch: function(contextId) {
+    this.replaceState({
+      contextId: contextId
     });
-    e.preventDefault();
-  };
+  },
 
-  this._toggleReference = function(e) {
+  // Triggered by Writer UI
+  handleContextToggle: function(e) {
+    e.preventDefault();    
+    var newContext = $(e.currentTarget).attr("data-id");
+    this.handleContextSwitch(newContext);
+  },
+
+  handleReferenceToggle: function(e) {
     e.preventDefault();
+
+    console.log('handling reference toggle');
     var referenceId = $(e.currentTarget).attr("data-id");
     var reference = this.props.doc.get(referenceId);
     var newState = null;
@@ -112,61 +106,21 @@ Writer.Prototype = function() {
       newState = handler(this, reference);
     }
 
-    // console.log('toggle reference', newState);
     if (newState) {
       this.setState(newState);
     } else {
       console.error("this reference type could not be handled:", reference.type);
     }
-  };
-
-  // Tools and panels can request context switches on writer level
-  // E.g. when a new a new entity should be tagged we would go into the state
-  // contextId: "tagentity"
-  this.handleContextSwitch = function(contextId) {
-    this.setState({
-      contextId: contextId
-    });
-  };
-
-
-  // State transition stuff
-  // ----------------
-
-  this.getInitialState = function() {
-    return {"contextId": "entities"};
-  };
-
-  // TODO: use getPanels() helper
-  // this.transition = function(oldState, newState, cb) {
-  //   var extensions = this.props.config.extensions;
-  //   var handled = false;
-
-  //   for (var i = 0; i < extensions.length && !handled; i++) {
-  //     var extension = extensions[i];
-  //     var transitions = extension.transitions;
-
-  //     // this.handleWriterTransition
-  //     for (var j = 0; j < transitions.length && !handled; j++) {
-  //       var transition = transitions[j];
-  //       handled = transition(this, oldState, newState, cb);
-  //       // if (handled) {
-  //       //   console.log('transition handled by', extension.name, 'extension:', transition);
-  //       // }
-  //     }
-  //   }
-
-  //   if (!handled) {
-  //     cb(null);
-  //   }
-  // };
+  },
 
   // Rendering
   // ----------------
 
-  this.createContextToggles = function() {
+  // Toggles for explicitly switching between context panels
+  createContextToggles: function() {
     var panels = this.getPanels();
     var contextId = this.state.contextId;
+    var self = this;
 
     var panelComps = panels.map(function(panelClass) {
       // We don't show dialogs here
@@ -180,20 +134,21 @@ Writer.Prototype = function() {
       return $$('a', {
         className: className.join(" "),
         href: "#",
+        key: panelClass.contextId,
         "data-id": panelClass.contextId,
-        html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.panelName
+        onClick: self.handleContextToggle,
+        dangerouslySetInnerHTML: {__html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.panelName}
       });
     });
 
     return $$('div', {className: "context-toggles"},
       _.compact(panelComps)
     );
-  };
+  },
 
-  // Create a new panel based on current state
-  // ----------------
+  // Create a new panel based on current writer state (contextId)
+  createContextPanel: function() {
 
-  this.createContextPanel = function() {
     var panels = this.getPanels();
     var contextId = this.state.contextId;
     var panelClass = null;
@@ -212,11 +167,9 @@ Writer.Prototype = function() {
     // Let the panel create an element, where props are derived from
     // writer state
     return panelClass.create(this);
-  };
+  },
 
-
-
-  this.render = function() {
+  render: function() {
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
         $$(ContentTools, { // will be reused
@@ -228,7 +181,6 @@ Writer.Prototype = function() {
         $$(ContentPanel, {
           writer: this,
           doc: this.props.doc,
-          id: 'content-panel'
         })
       ),
       $$('div', {className: "resource-container"},
@@ -236,10 +188,7 @@ Writer.Prototype = function() {
         this.createContextPanel(this) // will be possibly be recycled
       )
     );
-  };
-};
-
-Writer.Prototype.prototype = Component.prototype;
-Writer.prototype = new Writer.Prototype();
+  }
+});
 
 module.exports = Writer;

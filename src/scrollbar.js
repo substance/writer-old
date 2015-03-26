@@ -1,57 +1,33 @@
 "use strict";
 
-var Application = require("substance-application");
-var Component = Application.Component;
-var $$ = Application.$$;
+var $$ = React.createElement;
 var _ = require("underscore");
 
 // A rich scrollbar implementation that supports highlights
 // ----------------
 
-var Scrollbar = function(props) {
-  Component.call(this, props);
 
-  var self = this;
+var Scrollbar = React.createClass({
+  displayName: "Scrollbar",
 
-  _.bindAll(this, 'mouseDown', 'mouseUp', 'mouseMove', 'update');
+  getInitialState: function() {
+    return {
+      thumb: {top: 0, height: 20}, // just render at the top
+      highlights: [] // no highlights until state derived
+    };
+  },
 
-	// HACK: Wait until next pass of main event loop to ensure self.props.panel.el is actually there
-  // we wouldn't have this problem if we work with persistent .el elements
-  // 
-  // TODO: this needs to be triggered smarter right after panel has been mounted!
-  // maybe we can use event interface for panels so that we can bind to
-  // this.props.panel.on('componentDidMount', function() {
-  //  // do things
-  // })
-  
-  // Initialization
-	// _.delay(function() {
-	// 	self.panelContentEl = $(self.props.panel.el).find('.panel-content')[0];
+  componentDidMount: function() {
+     // HACK global window object!
+     $(window).mousemove(this.mouseMove);
+     $(window).mouseup(this.mouseUp);
+  },
 
- //    // Trigger update each time a scroll happens
-	// 	$(self.panelContentEl).on('scroll', _.bind(self.update, self));
-	// 	self.update();
-	// }, 0);
-};
-
-Scrollbar.Prototype = function() {
-
-  this.events = {
-    'mousedown': 'mouseDown'
-  };
-
-	this.componentDidMount = function() {
-    // HACK global window object!
-    $(window).mousemove(this.mouseMove);
-    $(window).mouseup(this.mouseUp);
-	};
-
-
-  this.mouseDown = function(e) {
+  mouseDown: function(e) {
     this._mouseDown = true;
-    var scrollBarOffset = $(this.el).offset().top;
+    var scrollBarOffset = $(this.getDOMNode()).offset().top;
     var y = e.pageY - scrollBarOffset;
-    var thumbEl = this.refs.thumb;
+    var thumbEl = this.refs.thumb.getDOMNode();
 
     if (e.target !== thumbEl) {
       // Jump to mousedown position
@@ -61,16 +37,16 @@ Scrollbar.Prototype = function() {
       this.offset = y - $(thumbEl).position().top;
     }
     return false;
-  };
+  },
 
   // Handle Mouse Up
   // -----------------
   //
   // Mouse lifted, no scroll anymore
 
-  this.mouseUp = function() {
+  mouseUp: function() {
     this._mouseDown = false;
-  };
+  },
 
   // Handle Scroll
   // -----------------
@@ -78,108 +54,96 @@ Scrollbar.Prototype = function() {
   // Handle scroll event
   // .visible-area handle
 
-  this.mouseMove = function(e) {
+  mouseMove: function(e) {
     if (this._mouseDown) {
-      var scrollBarOffset = $(this.el).offset().top;
+      var scrollBarOffset = $(this.getDOMNode()).offset().top;
       var y = e.pageY - scrollBarOffset;
 
       // find offset to visible-area.top
       var scroll = (y-this.offset)*this.factor;
       this.scrollTop = $(this.panelContentEl).scrollTop(scroll);
     }
-  };
+  },
 
-  this.componentDidRender = function() {
-    
-  };
+  update: function(panelContentEl) {
+    var self = this;
 
-  // Update scrollbar
-  // -----------------
-  //
-	// From the current rendering of .panel .panel-content derive state object
-	// that is used for rendering the scrollbar
+     this.panelContentEl = panelContentEl;
+     // initialized lazily as this element is not accessible earlier (e.g. during construction)
+     // get the new dimensions
+     // TODO: use outerheight for contentheight determination?
+     var contentHeight = $(self.panelContentEl).find('> div').outerHeight();
+     var panelHeight = $(self.panelContentEl).height();
 
-	this.update = function(panelContentEl) {
-		var self = this;
+     // Needed for scrollbar interaction
+     this.factor = (contentHeight / panelHeight);
+     
+     var scrollTop = $(self.panelContentEl).scrollTop();
 
-    this.panelContentEl = panelContentEl;
-    // initialized lazily as this element is not accessible earlier (e.g. during construction)
-    // get the new dimensions
-    // TODO: use outerheight for contentheight determination?
-    var contentHeight = $(self.panelContentEl).find('> div').outerHeight();
-    var panelHeight = $(self.panelContentEl).height();
+     // Compute highlights
+     var highlights = this.props.highlights.map(function(nodeId) {
+       var nodeEl = $(self.panelContentEl).find('*[data-id='+nodeId+']');
+       var top = nodeEl.position().top / self.factor;
+       var height = nodeEl.outerHeight(true) / self.factor;
 
-    // Needed for scrollbar interaction
-    this.factor = (contentHeight / panelHeight);
-    
-    var scrollTop = $(self.panelContentEl).scrollTop();
+       // HACK: make all highlights at least 3 pxls high, and centered around the desired top pos
+       if (height < Scrollbar.overlayMinHeight) {
+         height = Scrollbar.overlayMinHeight;
+         top = top - 0.5 * Scrollbar.overlayMinHeight;
+       }
 
-    // Compute highlights
-    var highlights = this.props.highlights.map(function(nodeId) {
-      var nodeEl = $(self.panelContentEl).find('*[data-id='+nodeId+']');
-      var top = nodeEl.position().top / self.factor;
-      var height = nodeEl.outerHeight(true) / self.factor;
+       var data = {
+         id: nodeId,
+         top: top,
+         height: height
+       }
+       return data;
+     });
 
-      // HACK: make all highlights at least 3 pxls high, and centered around the desired top pos
-      if (height < Scrollbar.overlayMinHeight) {
-        height = Scrollbar.overlayMinHeight;
-        top = top - 0.5 * Scrollbar.overlayMinHeight;
-      }
+     var thumbProps = {
+      top: scrollTop / this.factor,
+      height: panelHeight / this.factor
+     };
 
-      var data = {
-        id: nodeId,
-        top: top,
-        height: height
-      }
-      return data;
+    this.setState({
+      thumb: thumbProps,
+      highlights: highlights
+    });
+  },
+
+  render: function() {
+    console.log('Scrollbar.render');
+
+    console.log('highlights', this.state.highlights);
+    var highlightEls = this.state.highlights.map(function(h) {
+     return $$('div', {
+        className: 'highlight',
+        key: h.id,
+        style: {
+          top: h.top,
+          height: h.height
+        }
+      });
     });
 
-    var thumbProps = {
-    	top: scrollTop / this.factor,
-    	height: panelHeight / this.factor
-    };
-
-		this.setState({
-			thumb: thumbProps,
-			highlights: highlights
-		});
-	};
-
-	// We need to wait until component gets injected into the dom (see update)
-	this.getInitialState = function() {
-		return {
-			thumb: {top: 0, height: 20}, // just render at the top
-			highlights: [] // no highlights until state derived
-		};
-	};
-
-  this.render = function() {
-  	var highlightEls = this.state.highlights.map(function(h) {
-  		return $$('div', {
-        className: 'highlight',
-        style: "top:"+ h.top +"px; height: "+h.height+"px;"  
-      });
-  	});
-
-  	var thumbEl = $$('div', {
+    var thumbEl = $$('div', {
       ref: "thumb",
-  		className: "thumb",
-  		style: "top:"+ this.state.thumb.top +"px; height: "+this.state.thumb.height+"px;"
-  	});
+      className: "thumb",
+      style: {
+      top: this.state.thumb.top,
+      height: this.state.thumb.height
+     }
+    });
 
-    return $$("div", {className: "scrollbar-component"},
+    return $$("div", {className: "scrollbar-component", onMouseDown: this.mouseDown},
       thumbEl,
       $$('div', {className: 'highlights'}, 
-      	highlightEls
+       highlightEls
       )
     );
-  };
-};
+  }
+});
 
-Scrollbar.persistent = true;
-Scrollbar.overlayMinHeight = 5;
-
-Scrollbar.Prototype.prototype = Component.prototype;
-Scrollbar.prototype = new Scrollbar.Prototype();
+Scrollbar.overlayMinHeight = 5
 
 module.exports = Scrollbar;
