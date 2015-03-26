@@ -112,9 +112,6 @@ var Scrollbar = React.createClass({
   },
 
   render: function() {
-    console.log('Scrollbar.render');
-
-    console.log('highlights', this.state.highlights);
     var highlightEls = this.state.highlights.map(function(h) {
      return $$('div', {
         className: 'highlight',

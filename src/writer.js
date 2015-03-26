@@ -12,6 +12,10 @@ var ContentPanel = require("./content_panel");
 var Writer = React.createClass({
   displayName: "Writer",
 
+  getExtensions: function() {
+    return this.props.config.extensions;
+  },
+
   getNodeComponentClass: function(nodeType) {
     var extensions = this.props.config.extensions;
     var NodeClass;
@@ -51,30 +55,31 @@ var Writer = React.createClass({
   },
 
 
-  getReferenceHandlers: function() {
-    var extensions = this.props.config.extensions;
-    var refHandlers = [];
+  // Based on a certain writer state, determine what should be
+  // highlighted in the scrollbar. Maybe we need to create custom
+  // handlers for highlights in extensions, since there's no
+  // general way of determining the highlights
 
-    for (var i = 0; i < extensions.length; i++) {
-      var ext = extensions[i];
-      if (ext.referenceHandler) {
-        refHandlers.push(ext.referenceHandler);
+  getHighlightedNodes: function() {
+    var extensions = this.getExtensions();
+    var highlightedNodes = null;
+    for (var i = 0; i < extensions.length && !highlightedNodes; i++) {
+      var stateHandlers = extensions[i].stateHandlers;
+      if (stateHandlers) {
+        highlightedNodes = stateHandlers.getHighlightedNodes(this);
       }
     }
-
-    return refHandlers;
+    return highlightedNodes || [];
   },
 
-
   getInitialState: function() {
-    return {"contextId": "subjects", "subjectId": "54bae4cda868bc6fab4bcd0e"};
+    return {"contextId": "entities"};
   },
 
   // Events
   // ----------------
 
   componentDidMount: function() {
-    // 'click .annotation': '_toggleReference'
     $(this.getDOMNode()).on('click', '.annotation', this.handleReferenceToggle);
   },
 
@@ -95,20 +100,20 @@ var Writer = React.createClass({
   handleReferenceToggle: function(e) {
     e.preventDefault();
 
-    console.log('handling reference toggle');
     var referenceId = $(e.currentTarget).attr("data-id");
     var reference = this.props.doc.get(referenceId);
     var newState = null;
 
-    var refHandlers = this.getReferenceHandlers();
-    for (var i = 0; i < refHandlers.length && !newState; i++) {
-      var handler = refHandlers[i];
-      newState = handler(this, reference);
+    var extensions = this.getExtensions();
+    var handled = false;
+    for (var i = 0; i < extensions.length && !handled; i++) {
+      var stateHandlers = extensions[i].stateHandlers;
+      if (stateHandlers) {
+        handled = stateHandlers.handleReferenceToggle(this, reference);
+      }
     }
 
-    if (newState) {
-      this.setState(newState);
-    } else {
+    if (!handled) {
       console.error("this reference type could not be handled:", reference.type);
     }
   },
@@ -137,7 +142,7 @@ var Writer = React.createClass({
         key: panelClass.contextId,
         "data-id": panelClass.contextId,
         onClick: self.handleContextToggle,
-        dangerouslySetInnerHTML: {__html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.panelName}
+        dangerouslySetInnerHTML: {__html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.displayName}
       });
     });
 
@@ -148,25 +153,24 @@ var Writer = React.createClass({
 
   // Create a new panel based on current writer state (contextId)
   createContextPanel: function() {
-
     var panels = this.getPanels();
     var contextId = this.state.contextId;
-    var panelClass = null;
+    // var panelClass = null;
+    var panelElement = null;
+    var extensions = this.getExtensions();
 
-    for (var i = 0; i < panels.length && !panelClass; i++) {
-      var panel = panels[i];
-      if (contextId === panel.contextId) {
-        panelClass = panel;
+    for (var i = 0; i < extensions.length && !panelElement; i++) {
+      var stateHandlers = extensions[i].stateHandlers;
+      if (stateHandlers) {
+        panelElement = stateHandlers.handleContextPanelCreation(this);  
       }
     }
 
-    if (!panelClass) {
+    if (!panelElement) {
       throw new Error("No panel found for ", contextId);
     }
 
-    // Let the panel create an element, where props are derived from
-    // writer state
-    return panelClass.create(this);
+    return panelElement;
   },
 
   render: function() {

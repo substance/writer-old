@@ -1,6 +1,5 @@
 var $$ = React.createElement;
 var _ = require("underscore");
-
 var Scrollbar = require("./scrollbar");
 
 var ContentPanel = React.createClass({
@@ -35,28 +34,6 @@ var ContentPanel = React.createClass({
     this.refs.scrollbar.update(panelContentEl);
   },
 
-  // Based on a certain writer state, determine what should be
-  // highlighted in the scrollbar. Maybe we need to create custom
-  // handlers for highlights in extensions, since there's no
-  // general way of determining the highlights
-
-  getHighlightedNodes: function() {
-    var doc = this.props.doc;
-    var writerState = this.props.writer.state;
-
-    // This needs to be passed as a prop!
-    var target = writerState.entityId || writerState.subjectId;
-
-    console.log('TARGET', target);
-
-    var references = [];
-    if (target) {
-      // Get references for a particular target
-      references = Object.keys(doc.references.get(target));
-    }
-    return references;
-  },
-
   // Rendering
   // -----------------
 
@@ -73,12 +50,12 @@ var ContentPanel = React.createClass({
   },
 
   render: function() {
-    console.log('ContentPanel.render called');
+    var writer = this.props.writer;
 
     return $$("div", {className: "panel content-panel-component"}, // usually absolutely positioned
       $$(Scrollbar, {
         id: "content-scrollbar",
-        highlights: this.getHighlightedNodes(),
+        highlights: writer.getHighlightedNodes(),
         ref: "scrollbar"
       }),
       $$('div', {className: "panel-content", ref: "panelContent"}, // requires absolute positioning, overflow=auto

@@ -18,7 +18,7 @@ var ContentTools = React.createClass({
     };
 
     var toolComps = tools.map(function(tool, index) {
-      props.key = index+"222";
+      props.key = index;
       return $$(tool, props);
     });
 
