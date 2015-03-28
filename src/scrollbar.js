@@ -132,7 +132,7 @@ var Scrollbar = React.createClass({
      }
     });
 
-    return $$("div", {className: "scrollbar-component", onMouseDown: this.mouseDown},
+    return $$("div", {className: "scrollbar-component "+this.props.contextId, onMouseDown: this.mouseDown},
       thumbEl,
       $$('div', {className: 'highlights'}, 
        highlightEls

@@ -55,6 +55,7 @@ var ContentPanel = React.createClass({
     return $$("div", {className: "panel content-panel-component"}, // usually absolutely positioned
       $$(Scrollbar, {
         id: "content-scrollbar",
+        contextId: writer.state.contextId,
         highlights: writer.getHighlightedNodes(),
         ref: "scrollbar"
       }),
