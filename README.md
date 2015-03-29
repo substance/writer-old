@@ -32,7 +32,7 @@ Extension can introduce custom state configuration. E.g. if you introduce a new 
 
 You can enter your custom state by calling:
 
-```
+```js
 writer.replaceState({
   contextId: 'entities'
 });
@@ -40,16 +40,27 @@ writer.replaceState({
 
 You extension must now handle that new state, e.g. by creating an instance of a new custom panel:
 
+```js
+// from extensions/entities/stateHandlers.js
+handleContextPanelCreation: function(writer) {
+  var s = writer.state;
+  if (s.contextId === "entities") {
+    return $$(EntitiesPanel, {
+      writer: writer,
+    });
+  }
+},
+```
+
+Also you can determine what should be highlighted in the content panel's scrollbar when in that state:
 
 ```js
-  // from extensions/entities/stateHandlers.js
-  handleContextPanelCreation: function(writer) {
-    var s = writer.state;
-
-    if (s.contextId === "entities") {
-      return $$(EntitiesPanel, {
-        writer: writer,
-      });
-    }
-  },
+getHighlightedNodes: function(writer) {
+  var state = writer.state;
+  
+  if (state.contextId === "entities" && state.entityId) {
+    var references = Object.keys(doc.references.get(state.subjectId));
+    return references;
+  }
+};
 ```
