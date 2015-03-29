@@ -5,7 +5,6 @@ var _ = require("underscore");
 var ContentTools = require("./content_tools");
 var ContentPanel = require("./content_panel");
 
-
 // The Substance Writer Component
 // ----------------
 
@@ -97,12 +96,14 @@ var Writer = React.createClass({
     this.handleContextSwitch(newContext);
   },
 
+  // Handle click on a reference within the document
   handleReferenceToggle: function(e) {
     e.preventDefault();
 
     var referenceId = $(e.currentTarget).attr("data-id");
     var reference = this.props.doc.get(referenceId);
-    var newState = null;
+    // Skip for non reference toggles
+    if (!reference) return;
 
     var extensions = this.getExtensions();
     var handled = false;
