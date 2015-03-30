@@ -10,6 +10,17 @@ The Substance Writer component is intendet to be a framework for editor developm
 
 Checks if there's a valid selection and creates an annotation object. The UI will update automatically after the operation has been applied.
 
+Create a strong annotation.
+
+```js
+var newAnnotation = writer.createAnnotation({
+  id: "strong_12", // optional (a unique id will be generated if not provided)
+  type: "strong"
+});
+```
+
+Create a custom reference annotation
+
 ```js
 var newAnnotation = writer.createAnnotation({
   id: "entity_reference_25", // optional (a unique id will be generated if not provided)
@@ -24,7 +35,7 @@ Deleting existing annotations is easy too.
 writer.deleteAnnotation("entity_reference_25");
 ```
 
-*Note: This only works for valid Node Selections. That means that if you have a selection within a container that spans over multiple text nodes `createAnnotation` will throw an exception.*
+*Note: This only works for valid Text Selections. That means that if you have a selection within a container that spans over multiple text nodes or other things `createAnnotation` will throw an exception.*
 
 
 ## Selection API
@@ -40,6 +51,7 @@ var sel = writer.getTextSelection();
 sel.getPath(); // -> ["text_24", "content"] -> path to a text property
 sel.getRange(); // -> [34, 12] -> 
 sel.getText(); // returns text of what is selected
+sel.getActiveAnnotations(); ["strong", ""] // returns annotations that are at least partially overlapping with current text selection
 ```
 
 * Note: This selection will be invalid if you have selected multiple nodes in a container element.*
@@ -122,3 +134,13 @@ Usage of a text property in a custom info panel. Makeing a field editable and an
   }
 ```
 
+## Realizations
+
+- Substance.Document should not include view-relevant code
+  - Currently the Container Implementation is tangled with view stuff (Surfaces and Node Views)
+  - Functionality should be moved into Writer module
+- Simple scoped Text API's (`TextSelection`, `TextAnnotation`) suitable for many basic (form-based) editing scenarios.
+- More complex Container API (`ContainerSelection`, `ContainerAnnotation` -> speaking multi-node-annotations)
+  - Container editing behavior is specified close to container implementation
+    - E.g. ContentContainer editor could should specify which nodes it supports and how it handles edge cases, like braking and joining nodes etc. we should be able to make two different container editor implementations, with a different set of nodes and a different behavior for breaking etc. I think we should not put too much detail into the bare node implementations, to keep them reusable.
+    - Question: When a node (like figure) has components (title, caption), isn't this pretty much like a container? Maybe we could solve the same problem by allowing nested container nodes. Or let's call it composite nodes vs leaf nodes. Anyway something like a figure is structured in a defined way, while a containers primary behavior is managing a list of nodes that can be shuffled individually
