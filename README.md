@@ -24,7 +24,7 @@ Deleting existing annotations is easy too.
 writer.deleteAnnotation("entity_reference_25");
 ```
 
-**Note: There can be different kinds of selections. E.g. if content in a container is selected the annotation could span ver multiple nodes. TODO: define different behaviors depending on what is selected. Easiest implementation for now: only allow single-node annotations.**
+*Note: There can be different kinds of selections. E.g. if content in a container is selected the annotation could span ver multiple nodes. TODO: define different behaviors depending on what is selected. Easiest implementation for now: only allow single-node annotations.*
 
 
 ## Cursor and selection (within a single text node!)
