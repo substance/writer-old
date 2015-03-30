@@ -1,6 +1,6 @@
 # Writer
 
-The Substance Writer component is intendet to be a framework for editor development. A writer can be customized easily using extensions (panels, tools, node types) that operate on a defined interface the Writer API to control the custom editor's behavior.
+The Substance Writer component is intendet to be a framework for editor development. A writer can be customized easily using extensions (panels, tools, node types) that operate on a defined interface, the Writer API to control the custom editor's behavior.
 
 ## Writer API
 
@@ -25,6 +25,29 @@ writer.deleteAnnotation("entity_reference_25");
 ```
 
 **Note: There can be different kinds of selections. E.g. if content in a container is selected the annotation could span ver multiple nodes. TODO: define different behaviors depending on what is selected. Easiest implementation for now: only allow single-node annotations.**
+
+
+## Cursor and selection (within a single text node!)
+
+There are many different scenarios of where the selection could be, but for now we want to expose one generic selection API that is scoped to one text element. Note that this selection will be invalid if you have selected multiple nodes in a container element. However it will work 
+
+Get the current selection (SingleNodeSelection)
+
+```js
+var sel = writer.getSelection();
+sel.getPath(); // -> ["text_24", "content"]
+sel.getRange(); // -> [34, 12]
+sel.getText(); // returns text of what is selected
+```
+
+You can also modify that selection:
+
+```js
+sel.collapse();
+sel.expandRight(1);
+```
+
+TODO: How to expose an API for a multi-node selection.
 
 ## Managing state
 
@@ -52,11 +75,12 @@ handleContextPanelCreation: function(writer) {
 },
 ```
 
-Also you can determine what should be highlighted in the content panel's scrollbar when in that state:
+Also you can determine what should be highlighted in the content panel's scrollbar by deriving it from the current state
 
 ```js
 getHighlightedNodes: function(writer) {
   var state = writer.state;
+  var doc = writer.doc;
   
   if (state.contextId === "entities" && state.entityId) {
     var references = Object.keys(doc.references.get(state.subjectId));
