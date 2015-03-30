@@ -4,7 +4,7 @@ The Substance Writer component is intendet to be a framework for editor developm
 
 ## Writer API
 
-The Writer API is a work in progress and subject to change.
+*Note: The Writer API is a work in progress and subject to change.*
 
 ## Create annotations
 
@@ -24,32 +24,45 @@ Deleting existing annotations is easy too.
 writer.deleteAnnotation("entity_reference_25");
 ```
 
-*Note: There can be different kinds of selections. E.g. if content in a container is selected the annotation could span ver multiple nodes. TODO: define different behaviors depending on what is selected. Easiest implementation for now: only allow single-node annotations.*
+*Note: This only works for valid Node Selections. That means that if you have a selection within a container that spans over multiple text nodes `createAnnotation` will throw an exception.*
 
 
-## Cursor and selection (within a single text node!)
+## Selection API
 
-There are many different scenarios of where the selection could be, but for now we want to expose one generic selection API that is scoped to one text element. Note that this selection will be invalid if you have selected multiple nodes in a container element. However it will work 
+There are many different scenarios of where the selection could be, but for now we want to expose one generic selection API that is scoped to one text element. 
 
-`NodeSelection` API (or TextPropertySelection ?)
+### Text Selection API
+
+Describes a single selection within a text property editor.
 
 ```js
-var sel = writer.getSelection();
-sel.getPath(); // -> ["text_24", "content"]
-sel.getRange(); // -> [34, 12]
+var sel = writer.getTextSelection();
+sel.getPath(); // -> ["text_24", "content"] -> path to a text property
+sel.getRange(); // -> [34, 12] -> 
 sel.getText(); // returns text of what is selected
 ```
+
+* Note: This selection will be invalid if you have selected multiple nodes in a container element.*
 
 You can also modify that selection:
 
 ```js
 sel.collapse();
 sel.expandRight(1);
+// Manipulation API to be discussed.
 ```
 
-`ContainerSelection` API
+### Container Selection API
 
 When used in a container, we need to use a more complex selection object. e.g. we need to model when a selection spans over multiple nodes.
+
+```js
+var cSel = writer.getContainerSelection();
+```
+
+*Note: If your selection is not wrapped in a container, `writer.getContainerSelection` will return null.*
+
+TODO: document contaienr selection API.
 
 ## Managing state
 
@@ -94,7 +107,6 @@ getHighlightedNodes: function(writer) {
 
 ## Usage Examples
 
-
 Usage of a text property in a custom info panel. Makeing a field editable and annotatable property is as easy as delegating work to a TextProperty component instantiating with a doc and a path to a string property.
 
 ```js
@@ -103,7 +115,7 @@ Usage of a text property in a custom info panel. Makeing a field editable and an
       $$("div", {className: "panel-content"},
         $$('div', {className: "biography"},
           $$('div', {className: 'label'}, "Biography"),
-          $$(TextProperty, {doc: this.props.doc, path: ["document", "biography"])
+          $$(TextProperty, {doc: this.props.doc, path: ["document", "biography"]})
         )
       )
     );
