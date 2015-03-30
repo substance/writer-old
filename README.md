@@ -31,7 +31,7 @@ writer.deleteAnnotation("entity_reference_25");
 
 There are many different scenarios of where the selection could be, but for now we want to expose one generic selection API that is scoped to one text element. Note that this selection will be invalid if you have selected multiple nodes in a container element. However it will work 
 
-Get the current selection (SingleNodeSelection)
+`NodeSelection` API (or TextPropertySelection ?)
 
 ```js
 var sel = writer.getSelection();
@@ -47,7 +47,9 @@ sel.collapse();
 sel.expandRight(1);
 ```
 
-TODO: How to expose an API for a multi-node selection.
+`ContainerSelection` API
+
+When used in a container, we need to use a more complex selection object. e.g. we need to model when a selection spans over multiple nodes.
 
 ## Managing state
 
@@ -88,3 +90,23 @@ getHighlightedNodes: function(writer) {
   }
 };
 ```
+
+
+## Usage Examples
+
+
+Usage of a text property in a custom info panel. Makeing a field editable and annotatable property is as easy as delegating work to a TextProperty component instantiating with a doc and a path to a string property.
+
+```js
+  render: function() {
+    return $$("div", { className: "metadata-panel panel" },
+      $$("div", {className: "panel-content"},
+        $$('div', {className: "biography"},
+          $$('div', {className: 'label'}, "Biography"),
+          $$(TextProperty, {doc: this.props.doc, path: ["document", "biography"])
+        )
+      )
+    );
+  }
+```
+
