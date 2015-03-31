@@ -5,5 +5,7 @@
   "undef": true,
   "unused": true,
   "sub": true,
-  "globals": { "window": false }
+  "predef": [
+    "React"
+  ]
 }

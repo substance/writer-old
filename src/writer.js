@@ -1,3 +1,4 @@
+/* global $ */
 var $$ = React.createElement;
 var _ = require("underscore");
 
@@ -21,7 +22,9 @@ var Writer = React.createClass({
 
     for (var i = 0; i < extensions.length; i++) {
       var ext = extensions[i];
-      if (ext.nodes[nodeType]) NodeClass = ext.nodes[nodeType];
+      if (ext.components && ext.components[nodeType]) {
+        NodeClass = ext.components[nodeType];
+      }
     }
 
     if (!NodeClass) throw new Error("No component found for "+nodeType);
@@ -91,7 +94,7 @@ var Writer = React.createClass({
 
   // Triggered by Writer UI
   handleContextToggle: function(e) {
-    e.preventDefault();    
+    e.preventDefault();
     var newContext = $(e.currentTarget).attr("data-id");
     this.handleContextSwitch(newContext);
   },
@@ -154,7 +157,6 @@ var Writer = React.createClass({
 
   // Create a new panel based on current writer state (contextId)
   createContextPanel: function() {
-    var panels = this.getPanels();
     var contextId = this.state.contextId;
     // var panelClass = null;
     var panelElement = null;
@@ -163,7 +165,7 @@ var Writer = React.createClass({
     for (var i = 0; i < extensions.length && !panelElement; i++) {
       var stateHandlers = extensions[i].stateHandlers;
       if (stateHandlers) {
-        panelElement = stateHandlers.handleContextPanelCreation(this);  
+        panelElement = stateHandlers.handleContextPanelCreation(this);
       }
     }
 
