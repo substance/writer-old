@@ -10,9 +10,9 @@ var _ = require("underscore");
 var ContentTools = React.createClass({
   displayName: "ContentTools",
   render: function() {
-    var tools = this.props.writer.getTools();
+    var tools = this.props.writerCtrl.getTools();
     var props = {
-      writer: this.props.writer,
+      writerCtrl: this.props.writerCtrl,
       doc: this.props.doc,
       switchContext: this.props.switchContext
     };

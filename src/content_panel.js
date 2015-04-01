@@ -38,25 +38,25 @@ var ContentPanel = React.createClass({
   // -----------------
 
   getContentEditor: function() {
-    var writer = this.props.writer;
-    var doc = this.props.doc;
-    var ContainerClass = writer.getNodeComponentClass("container");
+    var writerCtrl = this.props.writerCtrl;
+    var doc = writerCtrl.doc;
+    var ContainerClass = writerCtrl.getNodeComponentClass("container");
 
     return $$(ContainerClass, {
-      writer: writer,
+      writerCtrl: writerCtrl,
       doc: doc,
       node: doc.get("content")
     });
   },
 
   render: function() {
-    var writer = this.props.writer;
+    var writerCtrl = this.props.writerCtrl;
 
     return $$("div", {className: "panel content-panel-component"}, // usually absolutely positioned
       $$(Scrollbar, {
         id: "content-scrollbar",
-        contextId: writer.state.contextId,
-        highlights: writer.getHighlightedNodes(),
+        contextId: writerCtrl.getState().contextId,
+        highlights: writerCtrl.getHighlightedNodes(),
         ref: "scrollbar"
       }),
       $$('div', {className: "panel-content", ref: "panelContent"}, // requires absolute positioning, overflow=auto

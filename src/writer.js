@@ -4,8 +4,7 @@ var _ = require("underscore");
 
 var ContentTools = require("./content_tools");
 var ContentPanel = require("./content_panel");
-
-
+var WriterController = require("./writer_controller");
 
 // The Substance Writer Component
 // ----------------
@@ -13,74 +12,23 @@ var ContentPanel = require("./content_panel");
 var Writer = React.createClass({
   displayName: "Writer",
 
-  getModules: function() {
-    return this.props.config.modules;
-  },
-
-  getNodeComponentClass: function(nodeType) {
-    var modules = this.props.config.modules;
-    var NodeClass;
-
-    for (var i = 0; i < modules.length; i++) {
-      var ext = modules[i];
-      if (ext.components && ext.components[nodeType]) {
-        NodeClass = ext.components[nodeType];
-      }
-    }
-
-    if (!NodeClass) throw new Error("No component found for "+nodeType);
-    return NodeClass;
-  },
-
-  getPanels: function() {
-    var modules = this.props.config.modules;
-    var panels = [];
-
-    for (var i = 0; i < modules.length; i++) {
-      var ext = modules[i];
-      panels = panels.concat(ext.panels);
-    }
-    return panels;
-  },
-
-  // Get all available tools from modules
-  getTools: function() {
-    var modules = this.props.config.modules;
-    var tools = [];
-
-    for (var i = 0; i < modules.length; i++) {
-      var ext = modules[i];
-      if (ext.tools) {
-        tools = tools.concat(ext.tools);
-      }
-    }
-    return tools;
-  },
-
-
-  // Based on a certain writer state, determine what should be
-  // highlighted in the scrollbar. Maybe we need to create custom
-  // handlers for highlights in modules, since there's no
-  // general way of determining the highlights
-
-  getHighlightedNodes: function() {
-    var modules = this.getModules();
-    var highlightedNodes = null;
-    for (var i = 0; i < modules.length && !highlightedNodes; i++) {
-      var stateHandlers = modules[i].stateHandlers;
-      if (stateHandlers) {
-        highlightedNodes = stateHandlers.getHighlightedNodes(this);
-      }
-    }
-    return highlightedNodes || [];
-  },
-
   getInitialState: function() {
+    console.log('getInitialState');
     return {"contextId": "subjects"};
   },
 
   // Events
   // ----------------
+
+  componentWillMount: function() {
+    // Initialize writer controller, which will serve as a common interface
+    // for custom modules
+    this.writerCtrl = new WriterController({
+      doc: this.props.doc,
+      writerComponent: this,
+      config: this.props.config
+    });
+  },
 
   componentDidMount: function() {
     $(this.getDOMNode()).on('click', '.annotation', this.handleReferenceToggle);
@@ -109,12 +57,12 @@ var Writer = React.createClass({
     // Skip for non reference toggles
     if (!reference) return;
 
-    var modules = this.getModules();
+    var modules = this.writerCtrl.getModules();
     var handled = false;
     for (var i = 0; i < modules.length && !handled; i++) {
       var stateHandlers = modules[i].stateHandlers;
       if (stateHandlers) {
-        handled = stateHandlers.handleReferenceToggle(this, reference);
+        handled = stateHandlers.handleReferenceToggle(this.writerCtrl, reference);
       }
     }
 
@@ -128,7 +76,7 @@ var Writer = React.createClass({
 
   // Toggles for explicitly switching between context panels
   createContextToggles: function() {
-    var panels = this.getPanels();
+    var panels = this.ctrl.getPanels();
     var contextId = this.state.contextId;
     var self = this;
 
@@ -159,21 +107,19 @@ var Writer = React.createClass({
   // Create a new panel based on current writer state (contextId)
   createContextPanel: function() {
     var contextId = this.state.contextId;
-    // var panelClass = null;
     var panelElement = null;
-    var modules = this.getModules();
+    var modules = this.ctrl.getModules();
 
     for (var i = 0; i < modules.length && !panelElement; i++) {
       var stateHandlers = modules[i].stateHandlers;
       if (stateHandlers) {
-        panelElement = stateHandlers.handleContextPanelCreation(this);
+        panelElement = stateHandlers.handleContextPanelCreation(this.writerCtrl);
       }
     }
 
     if (!panelElement) {
       throw new Error("No panel found for ", contextId);
     }
-
     return panelElement;
   },
 
@@ -181,14 +127,11 @@ var Writer = React.createClass({
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
         $$(ContentTools, { // will be reused
-          writer: this,
-          doc: this.props.doc,
-          id: "content-tools",
+          writerCtrl: this.ctrl,
           switchContext: _.bind(this.handleContextSwitch, this)
         }),
         $$(ContentPanel, {
-          writer: this,
-          doc: this.props.doc,
+          writerCtrl: this.ctrl,
         })
       ),
       $$('div', {className: "resource-container"},
