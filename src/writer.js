@@ -13,7 +13,7 @@ var Writer = React.createClass({
   displayName: "Writer",
 
   getInitialState: function() {
-    return {"contextId": "subjects"};
+    return {"contextId": "entities"};
   },
 
   // Events
