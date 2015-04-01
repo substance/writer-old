@@ -2,9 +2,10 @@
 var $$ = React.createElement;
 var _ = require("underscore");
 
-// Static sub components
 var ContentTools = require("./content_tools");
 var ContentPanel = require("./content_panel");
+
+
 
 // The Substance Writer Component
 // ----------------
@@ -12,16 +13,16 @@ var ContentPanel = require("./content_panel");
 var Writer = React.createClass({
   displayName: "Writer",
 
-  getExtensions: function() {
-    return this.props.config.extensions;
+  getModules: function() {
+    return this.props.config.modules;
   },
 
   getNodeComponentClass: function(nodeType) {
-    var extensions = this.props.config.extensions;
+    var modules = this.props.config.modules;
     var NodeClass;
 
-    for (var i = 0; i < extensions.length; i++) {
-      var ext = extensions[i];
+    for (var i = 0; i < modules.length; i++) {
+      var ext = modules[i];
       if (ext.components && ext.components[nodeType]) {
         NodeClass = ext.components[nodeType];
       }
@@ -32,23 +33,23 @@ var Writer = React.createClass({
   },
 
   getPanels: function() {
-    var extensions = this.props.config.extensions;
+    var modules = this.props.config.modules;
     var panels = [];
 
-    for (var i = 0; i < extensions.length; i++) {
-      var ext = extensions[i];
+    for (var i = 0; i < modules.length; i++) {
+      var ext = modules[i];
       panels = panels.concat(ext.panels);
     }
     return panels;
   },
 
-  // Get all available tools from extensions
+  // Get all available tools from modules
   getTools: function() {
-    var extensions = this.props.config.extensions;
+    var modules = this.props.config.modules;
     var tools = [];
 
-    for (var i = 0; i < extensions.length; i++) {
-      var ext = extensions[i];
+    for (var i = 0; i < modules.length; i++) {
+      var ext = modules[i];
       if (ext.tools) {
         tools = tools.concat(ext.tools);
       }
@@ -59,14 +60,14 @@ var Writer = React.createClass({
 
   // Based on a certain writer state, determine what should be
   // highlighted in the scrollbar. Maybe we need to create custom
-  // handlers for highlights in extensions, since there's no
+  // handlers for highlights in modules, since there's no
   // general way of determining the highlights
 
   getHighlightedNodes: function() {
-    var extensions = this.getExtensions();
+    var modules = this.getModules();
     var highlightedNodes = null;
-    for (var i = 0; i < extensions.length && !highlightedNodes; i++) {
-      var stateHandlers = extensions[i].stateHandlers;
+    for (var i = 0; i < modules.length && !highlightedNodes; i++) {
+      var stateHandlers = modules[i].stateHandlers;
       if (stateHandlers) {
         highlightedNodes = stateHandlers.getHighlightedNodes(this);
       }
@@ -108,10 +109,10 @@ var Writer = React.createClass({
     // Skip for non reference toggles
     if (!reference) return;
 
-    var extensions = this.getExtensions();
+    var modules = this.getModules();
     var handled = false;
-    for (var i = 0; i < extensions.length && !handled; i++) {
-      var stateHandlers = extensions[i].stateHandlers;
+    for (var i = 0; i < modules.length && !handled; i++) {
+      var stateHandlers = modules[i].stateHandlers;
       if (stateHandlers) {
         handled = stateHandlers.handleReferenceToggle(this, reference);
       }
@@ -160,10 +161,10 @@ var Writer = React.createClass({
     var contextId = this.state.contextId;
     // var panelClass = null;
     var panelElement = null;
-    var extensions = this.getExtensions();
+    var modules = this.getModules();
 
-    for (var i = 0; i < extensions.length && !panelElement; i++) {
-      var stateHandlers = extensions[i].stateHandlers;
+    for (var i = 0; i < modules.length && !panelElement; i++) {
+      var stateHandlers = modules[i].stateHandlers;
       if (stateHandlers) {
         panelElement = stateHandlers.handleContextPanelCreation(this);
       }
