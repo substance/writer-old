@@ -35,11 +35,7 @@ WriterController.Prototype = function() {
   this.getState = function() {
     return this.writerComponent.state;
   };
-
-  this.getActiveContext = function() {
-    this.writerComponent.state.contextId;
-  };
-
+  
   this.getModules = function() {
     return this.config.modules;
   };
@@ -106,8 +102,30 @@ WriterController.Prototype = function() {
     // TODO: implement  
   };
 
-  this.annotate = function() {
-    
+  this.annotate = function(annoSpec) {
+    // Some dumb fake implementation
+    var path = ["text_3", "content"];
+    var range = [40, 80];
+
+    var annotation = {
+      id: annoSpec.id || annoSpec.type+"_" + Substance.uuid(),
+      type: annoSpec.type,
+      path: path,
+      range: range,
+      target: annoSpec.target
+    };
+
+    // // Display reference in editor
+    this.doc.create(annotation);
+
+    var className = annotation.type.replace("_", "-");
+
+    // // Some fake action until editor is ready
+    var textNode = this.doc.get("text_3");
+    var newContent = textNode.content += ' and <span data-id="'+annotation.id+'" class="annotation '+className+'">'+annotation.id+'</span>';
+    this.doc.set(["text_3", "content"], newContent);
+
+    return annotation;
   };
 
 };

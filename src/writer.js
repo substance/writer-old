@@ -13,7 +13,6 @@ var Writer = React.createClass({
   displayName: "Writer",
 
   getInitialState: function() {
-    console.log('getInitialState');
     return {"contextId": "subjects"};
   },
 
@@ -76,7 +75,7 @@ var Writer = React.createClass({
 
   // Toggles for explicitly switching between context panels
   createContextToggles: function() {
-    var panels = this.ctrl.getPanels();
+    var panels = this.writerCtrl.getPanels();
     var contextId = this.state.contextId;
     var self = this;
 
@@ -108,7 +107,7 @@ var Writer = React.createClass({
   createContextPanel: function() {
     var contextId = this.state.contextId;
     var panelElement = null;
-    var modules = this.ctrl.getModules();
+    var modules = this.writerCtrl.getModules();
 
     for (var i = 0; i < modules.length && !panelElement; i++) {
       var stateHandlers = modules[i].stateHandlers;
@@ -127,11 +126,11 @@ var Writer = React.createClass({
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
         $$(ContentTools, { // will be reused
-          writerCtrl: this.ctrl,
+          writerCtrl: this.writerCtrl,
           switchContext: _.bind(this.handleContextSwitch, this)
         }),
         $$(ContentPanel, {
-          writerCtrl: this.ctrl,
+          writerCtrl: this.writerCtrl,
         })
       ),
       $$('div', {className: "resource-container"},
