@@ -1,5 +1,3 @@
-var Application = require("substance-application");
-var Component = Application.Component;
 var $$ = React.createElement;
 
 var _ = require("underscore");
