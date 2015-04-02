@@ -1,7 +1,5 @@
 var $$ = React.createElement;
 
-var _ = require("underscore");
-
 // The Content Panel
 // ----------------
 

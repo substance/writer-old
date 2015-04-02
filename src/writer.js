@@ -1,7 +1,7 @@
 /* global $ */
 var $$ = React.createElement;
-var _ = require("underscore");
 
+var Substance = require("substance");
 var ContentTools = require("./content_tools");
 var ContentPanel = require("./content_panel");
 var WriterController = require("./writer_controller");
@@ -99,7 +99,7 @@ var Writer = React.createClass({
     });
 
     return $$('div', {className: "context-toggles"},
-      _.compact(panelComps)
+      Substance.compact(panelComps)
     );
   },
 
@@ -127,7 +127,7 @@ var Writer = React.createClass({
       $$('div', {className: "main-container"},
         $$(ContentTools, { // will be reused
           writerCtrl: this.writerCtrl,
-          switchContext: _.bind(this.handleContextSwitch, this)
+          switchContext: this.handleContextSwitch.bind(this)
         }),
         $$(ContentPanel, {
           writerCtrl: this.writerCtrl,

@@ -1,7 +1,6 @@
 "use strict";
 
 var $$ = React.createElement;
-var _ = require("underscore");
 
 // A rich scrollbar implementation that supports highlights
 // ----------------

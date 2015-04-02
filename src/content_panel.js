@@ -1,5 +1,5 @@
 var $$ = React.createElement;
-var _ = require("underscore");
+var Substance = require("substance");
 var Scrollbar = require("./scrollbar");
 
 var ContentPanel = React.createClass({
@@ -20,13 +20,13 @@ var ContentPanel = React.createClass({
     var panelContentEl = this.refs.panelContent.getDOMNode();
 
     // We need to await next repaint, otherwise dimensions will be wrong
-    _.delay(function() {
+    Substance.delay(function() {
       scrollbar.update(panelContentEl);  
     },0);
 
     // (Re)-Bind scroll event on new panelContentEl
     $(panelContentEl).off('scroll');
-    $(panelContentEl).on('scroll', _.bind(this._onScroll, this));
+    $(panelContentEl).on('scroll', this._onScroll.bind(this));
   },
 
   _onScroll: function(e) {
