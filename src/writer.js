@@ -30,7 +30,7 @@ var Writer = React.createClass({
   },
 
   componentDidMount: function() {
-    $(this.getDOMNode()).on('click', '.annotation', this.handleReferenceToggle);
+    $(this.getDOMNode()).on('click', '.reference', this.handleReferenceToggle);
   },
 
   // E.g. when a tool requests a context switch
