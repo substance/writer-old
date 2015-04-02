@@ -12,16 +12,6 @@ var WriterController = function(opts) {
   this.doc = opts.doc;
   this.writerComponent = opts.writerComponent;
 
-  var self = this;
-
-  Object.defineProperty(this, 'state', {
-    get: function() {
-      return this.writerComponent.state;
-    },
-    set: function(value) {
-      throw new Error("Immutable property. Use replaceState");
-    }
-  });
 };
 
 WriterController.Prototype = function() {
@@ -130,7 +120,16 @@ WriterController.Prototype = function() {
 
 };
 
-
 Substance.initClass(WriterController);
+
+Object.defineProperty(WriterController.prototype, 'state', {
+  get: function() {
+    return this.writerComponent.state;
+  },
+  set: function(value) {
+    throw new Error("Immutable property. Use replaceState");
+  }
+});
+
 
 module.exports = WriterController;
