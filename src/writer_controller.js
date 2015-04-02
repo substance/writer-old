@@ -1,6 +1,7 @@
 "use strict";
 
 var Substance = require('substance');
+var Document = Substance.Document;
 
 // Writer Controller
 // ----------------
@@ -11,7 +12,7 @@ var WriterController = function(opts) {
   this.config = opts.config;
   this.doc = opts.doc;
   this.writerComponent = opts.writerComponent;
-
+  this.surfaces = {};
 };
 
 WriterController.Prototype = function() {
@@ -19,6 +20,39 @@ WriterController.Prototype = function() {
   // API method used by writer modules to modify the writer state
   this.replaceState = function(newState) {
     this.writerComponent.replaceState(newState);
+  };
+
+  this.registerSurface = function(surface, name) {
+    name = name || Substance.uuid();
+    this.surfaces[name] = surface;
+    surface.connect(this, {
+      'selection:changed': function(sel) {
+        this.updateSurface(surface);
+      }
+    });
+  };
+
+  this.updateSurface = function(surface) {
+    this.activeSurface = surface;
+  };
+
+  this.getSurface = function() {
+    return this.activeSurface;
+  };
+
+  this.getSelection = function() {
+    if (!this.activeSurface) return Document.nullSelection;
+    return this.activeSurface.getSelection();
+  };
+
+  this.unregisterSurface = function(surface) {
+    Substance.each(this.surfaces, function(s, name) {
+      if (surface === s) {
+        delete this.surfaces[name];
+      }
+    }, this);
+
+    surface.disconnect(this);
   };
 
   // Remove since we have a property getter already?
@@ -87,33 +121,26 @@ WriterController.Prototype = function() {
     return highlightedNodes || [];
   };
 
-  // Get current active selection in writer
-  this.getSelection = function() {
-    // TODO: implement  
-  };
-
   this.annotate = function(annoSpec) {
-    // Some dumb fake implementation
-    var path = ["text_3", "content"];
-    var range = [40, 80];
+    var sel = this.getSelection();
 
-    var annotation = {
-      id: annoSpec.id || annoSpec.type+"_" + Substance.uuid(),
-      type: annoSpec.type,
-      path: path,
-      range: range,
-      target: annoSpec.target
-    };
+    if (sel.isNull()) throw new Error("Selection is null");
+    if (!sel.isPropertySelection()) throw new Error("Selection is not a PropertySelection");
 
-    // // Display reference in editor
-    this.doc.create(annotation);
+    var annotation = Substance.extend({}, annoSpec);
+    annotation.id = annoSpec.id || annoSpec.type+"_" + Substance.uuid();
+    annotation.path = sel.getPath();
+    annotation.range = sel.getTextRange();
 
-    var className = annotation.type.replace("_", "-");
+    // var tx = this.doc.startTransaction();
+    // annotation = tx.create(annotation);
+    // tx.save();
 
-    // // Some fake action until editor is ready
-    var textNode = this.doc.get("text_3");
-    var newContent = textNode.content += ' and <span data-id="'+annotation.id+'" class="annotation '+className+'">'+annotation.id+'</span>';
-    this.doc.set(["text_3", "content"], newContent);
+    this.doc.data.create(annotation);
+
+    annotation = this.doc.get(annotation.id);
+
+    console.log('created annotation', annotation);
 
     return annotation;
   };
