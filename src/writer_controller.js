@@ -9,10 +9,13 @@ var Document = Substance.Document;
 // An common interface for all writer modules
 
 var WriterController = function(opts) {
+  Substance.EventEmitter.call(this);
+
   this.config = opts.config;
   this.doc = opts.doc;
   this.writerComponent = opts.writerComponent;
   this.surfaces = {};
+
 };
 
 WriterController.Prototype = function() {
@@ -29,6 +32,7 @@ WriterController.Prototype = function() {
       'selection:changed': function(sel) {
         this.updateSurface(surface);
         this.onSelectionChanged(sel);
+        this.emit('selection:changed', sel);
       }
     });
   };
@@ -138,6 +142,12 @@ WriterController.Prototype = function() {
     return highlightedNodes || [];
   };
 
+  this.deleteAnnotation = function(annotationId) {
+    var tx = this.doc.startTransaction();
+    tx.delete(annotationId);
+    tx.save();
+  };
+
   this.annotate = function(annoSpec) {
     var sel = this.getSelection();
 
@@ -163,7 +173,10 @@ WriterController.Prototype = function() {
 
 };
 
-Substance.initClass(WriterController);
+
+Substance.inherit(WriterController, Substance.EventEmitter);
+
+// Substance.initClass(WriterController);
 
 Object.defineProperty(WriterController.prototype, 'state', {
   get: function() {
