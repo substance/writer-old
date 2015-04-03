@@ -27,10 +27,18 @@ var Writer = React.createClass({
       writerComponent: this,
       config: this.props.config
     });
+  }, 
+
+
+  shouldComponentUpdate: function(nextProps, nextState) {
+    if (Substance.isEqual(this.state, nextState)) {
+      return false;
+    }
+    return true;
   },
 
   componentDidMount: function() {
-    $(this.getDOMNode()).on('click', '.reference', this.handleReferenceToggle);
+    // $(this.getDOMNode()).on('click', '.reference', this.handleReferenceToggle);
   },
 
   // E.g. when a tool requests a context switch
@@ -48,27 +56,27 @@ var Writer = React.createClass({
   },
 
   // Handle click on a reference within the document
-  handleReferenceToggle: function(e) {
-    e.preventDefault();
+  // handleReferenceToggle: function(e) {
+  //   e.preventDefault();
 
-    var referenceId = $(e.currentTarget).attr("data-id");
-    var reference = this.props.doc.get(referenceId);
-    // Skip for non reference toggles
-    if (!reference) return;
+  //   var referenceId = $(e.currentTarget).attr("data-id");
+  //   var reference = this.props.doc.get(referenceId);
+  //   // Skip for non reference toggles
+  //   if (!reference) return;
 
-    var modules = this.writerCtrl.getModules();
-    var handled = false;
-    for (var i = 0; i < modules.length && !handled; i++) {
-      var stateHandlers = modules[i].stateHandlers;
-      if (stateHandlers) {
-        handled = stateHandlers.handleReferenceToggle(this.writerCtrl, reference);
-      }
-    }
+  //   var modules = this.writerCtrl.getModules();
+  //   var handled = false;
+  //   for (var i = 0; i < modules.length && !handled; i++) {
+  //     var stateHandlers = modules[i].stateHandlers;
+  //     if (stateHandlers && stateHandlers.handleReferenceToggle) {
+  //       handled = stateHandlers.handleReferenceToggle(this.writerCtrl, reference);
+  //     }
+  //   }
 
-    if (!handled) {
-      console.error("this reference type could not be handled:", reference.type);
-    }
-  },
+  //   if (!handled) {
+  //     console.error("this reference type could not be handled:", reference.type);
+  //   }
+  // },
 
   // Rendering
   // ----------------
@@ -111,7 +119,7 @@ var Writer = React.createClass({
 
     for (var i = 0; i < modules.length && !panelElement; i++) {
       var stateHandlers = modules[i].stateHandlers;
-      if (stateHandlers) {
+      if (stateHandlers && stateHandlers.handleContextPanelCreation) {
         panelElement = stateHandlers.handleContextPanelCreation(this.writerCtrl);
       }
     }

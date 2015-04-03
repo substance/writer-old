@@ -28,8 +28,25 @@ WriterController.Prototype = function() {
     surface.connect(this, {
       'selection:changed': function(sel) {
         this.updateSurface(surface);
+        this.onSelectionChanged(sel);
       }
     });
+  };
+
+  this.onSelectionChanged = function(sel) {
+    // console.log('selection changed', sel);
+
+    // var range = sel.getTextRange();
+    // var annotations = this.doc.annotationIndex.get(sel.getPath(), range[0], range[1]);
+
+    var modules = this.getModules();
+    var handled = false;
+    for (var i = 0; i < modules.length && !handled; i++) {
+      var stateHandlers = modules[i].stateHandlers;
+      if (stateHandlers && stateHandlers.handleSelectionChange) {
+        handled = stateHandlers.handleSelectionChange(this, sel);
+      }
+    }
   };
 
   this.updateSurface = function(surface) {
@@ -114,7 +131,7 @@ WriterController.Prototype = function() {
     var highlightedNodes = null;
     for (var i = 0; i < modules.length && !highlightedNodes; i++) {
       var stateHandlers = modules[i].stateHandlers;
-      if (stateHandlers) {
+      if (stateHandlers && stateHandlers.getHighlightedNodes) {
         highlightedNodes = stateHandlers.getHighlightedNodes(this);
       }
     }
