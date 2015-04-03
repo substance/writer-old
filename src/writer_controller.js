@@ -5,7 +5,7 @@ var Document = Substance.Document;
 
 // Writer Controller
 // ----------------
-// 
+//
 // An common interface for all writer modules
 
 var WriterController = function(opts) {
@@ -59,7 +59,7 @@ WriterController.Prototype = function() {
   this.getState = function() {
     return this.writerComponent.state;
   };
-  
+
   this.getModules = function() {
     return this.config.modules;
   };
@@ -132,13 +132,12 @@ WriterController.Prototype = function() {
     annotation.path = sel.getPath();
     annotation.range = sel.getTextRange();
 
-    // var tx = this.doc.startTransaction();
-    // annotation = tx.create(annotation);
-    // tx.save();
+    var tx = this.doc.startTransaction();
+    annotation = tx.create(annotation);
+    tx.save();
 
-    this.doc.data.create(annotation);
-
-    annotation = this.doc.get(annotation.id);
+    // this.doc.data.create(annotation);
+    // annotation = this.doc.get(annotation.id);
 
     console.log('created annotation', annotation);
 
