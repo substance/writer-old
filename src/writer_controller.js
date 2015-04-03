@@ -151,13 +151,21 @@ WriterController.Prototype = function() {
   this.annotate = function(annoSpec) {
     var sel = this.getSelection();
 
-    if (sel.isNull()) throw new Error("Selection is null");
-    if (!sel.isPropertySelection()) throw new Error("Selection is not a PropertySelection");
+    var range = annoSpec.range;
+    var path = annoSpec.path;
+
+    // Use active selection for retrieving path and range
+    if (!path || !range) {
+      if (sel.isNull()) throw new Error("Selection is null");
+      if (!sel.isPropertySelection()) throw new Error("Selection is not a PropertySelection");      
+      path = sel.getPath();
+      range = sel.getTextRange();
+    }
 
     var annotation = Substance.extend({}, annoSpec);
     annotation.id = annoSpec.id || annoSpec.type+"_" + Substance.uuid();
-    annotation.path = sel.getPath();
-    annotation.range = sel.getTextRange();
+    annotation.path = path;
+    annotation.range = range;
 
     var tx = this.doc.startTransaction();
     annotation = tx.create(annotation);
