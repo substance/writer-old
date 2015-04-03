@@ -9,28 +9,11 @@ var ContentPanel = React.createClass({
   // the scrollbar and reattach the scroll event
   componentDidMount: function() {
     this.updateScrollbar();
-    // this.updateHighlights();
+    $(window).resize(this.updateScrollbar);
   },
 
   componentDidUpdate: function() {
     this.updateScrollbar();
-    // this.updateHighlights();
-  },
-
-  // Caution: This circuments React
-  updateHighlights: function() {
-    var writerCtrl = this.props.writerCtrl;
-    var contentEditorEl = this.refs.contentEditor.getDOMNode();
-    
-    var highlightedNodes = writerCtrl.getHighlightedNodes();
-
-    // Substance.delay(function() {
-    //   Substance.each(highlightedNodes, function(nodeId) {
-    //     $(contentEditorEl).find("*[data-id="+nodeId+"]").addClass('active');
-    //   });
-    // }, 2000);
-
-    // console.log('contenteditorEl', contentEditorEl, highlightedNodes);
   },
 
   updateScrollbar: function() {
