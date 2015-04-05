@@ -13,7 +13,7 @@ var Writer = React.createClass({
   displayName: "Writer",
 
   getInitialState: function() {
-    return {"contextId": "entities"};
+    return {"contextId": "subjects"};
   },
 
   // Events
@@ -134,8 +134,7 @@ var Writer = React.createClass({
     return $$('div', {className: 'writer-component'},
       $$('div', {className: "main-container"},
         $$(ContentTools, { // will be reused
-          writerCtrl: this.writerCtrl,
-          switchContext: this.handleContextSwitch.bind(this)
+          writerCtrl: this.writerCtrl
         }),
         $$(ContentPanel, {
           writerCtrl: this.writerCtrl,

@@ -27,7 +27,7 @@ var ContentPanel = React.createClass({
 
     // (Re)-Bind scroll event on new panelContentEl
     $(panelContentEl).off('scroll');
-    $(panelContentEl).on('scroll', this._onScroll.bind(this));
+    $(panelContentEl).on('scroll', this._onScroll);
   },
 
   _onScroll: function(e) {
