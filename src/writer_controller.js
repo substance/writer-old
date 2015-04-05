@@ -66,6 +66,7 @@ WriterController.Prototype = function() {
     return this.activeSurface.getSelection();
   };
 
+
   this.unregisterSurface = function(surface) {
     Substance.each(this.surfaces, function(s, name) {
       if (surface === s) {
@@ -170,11 +171,6 @@ WriterController.Prototype = function() {
     var tx = this.doc.startTransaction();
     annotation = tx.create(annotation);
     tx.save();
-
-    // this.doc.data.create(annotation);
-    // annotation = this.doc.get(annotation.id);
-
-    console.log('created annotation', annotation);
 
     return annotation;
   };
