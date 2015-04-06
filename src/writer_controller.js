@@ -2,6 +2,7 @@
 
 var Substance = require('substance');
 var Document = Substance.Document;
+var Selection = Document.Selection;
 
 // Writer Controller
 // ----------------
@@ -144,9 +145,13 @@ WriterController.Prototype = function() {
   };
 
   this.deleteAnnotation = function(annotationId) {
+    var anno = this.doc.get(annotationId);
     var tx = this.doc.startTransaction();
     tx.delete(annotationId);
-    tx.save();
+    tx.save({
+      selectionBefore: this.getSelection(),
+      selectionAfter: Selection.create(anno.path, anno.range[0], anno.range[1])
+    });
   };
 
   this.annotate = function(annoSpec) {
@@ -158,7 +163,7 @@ WriterController.Prototype = function() {
     // Use active selection for retrieving path and range
     if (!path || !range) {
       if (sel.isNull()) throw new Error("Selection is null");
-      if (!sel.isPropertySelection()) throw new Error("Selection is not a PropertySelection");      
+      if (!sel.isPropertySelection()) throw new Error("Selection is not a PropertySelection");
       path = sel.getPath();
       range = sel.getTextRange();
     }
@@ -186,7 +191,7 @@ Object.defineProperty(WriterController.prototype, 'state', {
   get: function() {
     return this.writerComponent.state;
   },
-  set: function(value) {
+  set: function() {
     throw new Error("Immutable property. Use replaceState");
   }
 });
