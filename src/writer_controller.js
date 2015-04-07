@@ -33,6 +33,7 @@ WriterController.Prototype = function() {
   this.transactionStarted = function(tx) {
     // store the state so that it can be recovered when undo/redo
     tx.before.state = this.writerComponent.state;
+    tx.before.selection = this.getSelection();
     if (this.activeSurface) {
       tx.before.surfaceName = this.activeSurface.name;
     }
