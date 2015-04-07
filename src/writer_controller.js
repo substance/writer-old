@@ -29,6 +29,11 @@ WriterController.Prototype = function() {
   this.registerSurface = function(surface, name) {
     name = name || Substance.uuid();
     this.surfaces[name] = surface;
+    if (surface.name) {
+      throw new Error("Surface has already been attached");
+    }
+    // HACK! we store a name on the surface for later decision making
+    surface.name = name;
     surface.connect(this, {
       'selection:changed': function(sel) {
         this.updateSurface(surface);
