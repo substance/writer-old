@@ -1,6 +1,7 @@
 "use strict";
 
 var $$ = React.createElement;
+var _ = require("substance/helpers");
 
 // A rich scrollbar implementation that supports highlights
 // ----------------
@@ -71,7 +72,12 @@ var Scrollbar = React.createClass({
      // initialized lazily as this element is not accessible earlier (e.g. during construction)
      // get the new dimensions
      // TODO: use outerheight for contentheight determination?
-     var contentHeight = $(self.panelContentEl).find('> div').outerHeight();
+     var contentHeight = 0;
+
+     $(panelContentEl).children().each(function() {
+      contentHeight += $(this).outerHeight();
+     });
+
      var panelHeight = $(self.panelContentEl).height();
 
      // Needed for scrollbar interaction
