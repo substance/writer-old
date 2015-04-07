@@ -33,7 +33,9 @@ WriterController.Prototype = function() {
   this.transactionStarted = function(tx) {
     // store the state so that it can be recovered when undo/redo
     tx.before.state = this.writerComponent.state;
-    tx.before.surface = this.getSurface();
+    if (this.activeSurface) {
+      tx.before.surfaceName = this.activeSurface.name;
+    }
   };
 
   this.registerSurface = function(surface, name) {
@@ -74,8 +76,9 @@ WriterController.Prototype = function() {
       this.replaceState(change.after.state);
       var self = this;
       window.setTimeout(function() {
-        if (change.after.surface) {
-          change.after.surface.setSelection(change.after.selection);
+        if (change.after.surfaceName) {
+          var surface = self.surfaces[change.after.surfaceName];
+          surface.setSelection(change.after.selection);
         }
       });
     }
