@@ -61,7 +61,9 @@ var ContentPanel = React.createClass({
         highlights: writerCtrl.getHighlightedNodes(),
         ref: "scrollbar"
       }),
+
       $$('div', {className: "panel-content", ref: "panelContent"}, // requires absolute positioning, overflow=auto
+        $$('div', {className: "interview-subject-name"}, "INSERT INTERVIEW SUBJECT NAME"),
         this.getContentEditor()
       )
     );
