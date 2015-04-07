@@ -176,12 +176,9 @@ WriterController.Prototype = function() {
 
   this.deleteAnnotation = function(annotationId) {
     var anno = this.doc.get(annotationId);
-    var tx = this.doc.startTransaction();
+    var tx = this.doc.startTransaction({ selection: this.getSelection() });
     tx.delete(annotationId);
-    tx.save({
-      selectionBefore: this.getSelection(),
-      selectionAfter: Selection.create(anno.path, anno.range[0], anno.range[1])
-    });
+    tx.save({ selection: Selection.create(anno.path, anno.range[0], anno.range[1]) });
   };
 
   this.annotate = function(annoSpec) {
