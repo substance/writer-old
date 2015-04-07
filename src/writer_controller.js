@@ -17,6 +17,10 @@ var WriterController = function(opts) {
   this.writerComponent = opts.writerComponent;
   this.surfaces = {};
 
+  this.doc.connect(this, {
+    'transaction:started': this.transactionStarted,
+    'document:changed': this.onDocumentChanged
+  });
 };
 
 WriterController.Prototype = function() {
@@ -24,6 +28,12 @@ WriterController.Prototype = function() {
   // API method used by writer modules to modify the writer state
   this.replaceState = function(newState) {
     this.writerComponent.replaceState(newState);
+  };
+
+  this.transactionStarted = function(tx) {
+    // store the state so that it can be recovered when undo/redo
+    tx.before.state = this.writerComponent.state;
+    tx.before.surface = this.getSurface();
   };
 
   this.registerSurface = function(surface, name) {
@@ -59,6 +69,18 @@ WriterController.Prototype = function() {
     }
   };
 
+  this.onDocumentChanged = function(change, info) {
+    if (info.replay) {
+      this.replaceState(change.after.state);
+      var self = this;
+      window.setTimeout(function() {
+        if (change.after.surface) {
+          change.after.surface.setSelection(change.after.selection);
+        }
+      });
+    }
+  };
+
   this.updateSurface = function(surface) {
     this.activeSurface = surface;
   };
@@ -71,7 +93,6 @@ WriterController.Prototype = function() {
     if (!this.activeSurface) return Document.nullSelection;
     return this.activeSurface.getSelection();
   };
-
 
   this.unregisterSurface = function(surface) {
     Substance.each(this.surfaces, function(s, name) {
@@ -178,13 +199,10 @@ WriterController.Prototype = function() {
     annotation.path = path;
     annotation.range = range;
 
-    var tx = this.doc.startTransaction();
+    // start the transaction with an initial selection
+    var tx = this.doc.startTransaction({ selection: this.getSelection() });
     annotation = tx.create(annotation);
-
-    tx.save({
-      selectionBefore: this.getSelection(),
-      selectionAfter: Selection.create(path, range[0], range[1])
-    });
+    tx.save({ selection: Selection.create(path, range[0], range[1]) });
 
     return annotation;
   };
