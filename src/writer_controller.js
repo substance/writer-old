@@ -175,7 +175,11 @@ WriterController.Prototype = function() {
 
     var tx = this.doc.startTransaction();
     annotation = tx.create(annotation);
-    tx.save();
+
+    tx.save({
+      selectionBefore: this.getSelection(),
+      selectionAfter: Selection.create(path, range[0], range[1])
+    });
 
     return annotation;
   };
