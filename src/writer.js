@@ -37,7 +37,9 @@ var Writer = React.createClass({
   },
 
   shouldComponentUpdate: function(nextProps, nextState) {
-    if (Substance.isEqual(this.state, nextState)) {
+    var sprevState = JSON.stringify(this.state);
+    var snextState = JSON.stringify(nextState);
+    if (Substance.isEqual(sprevState, snextState)) {
       return false;
     }
     return true;
@@ -56,8 +58,6 @@ var Writer = React.createClass({
     var self = this;
     var backend = this.context.backend;
     var notifications = this.context.notifications;
-
-    console.log('autosaving... doc is dirty:', doc.__dirty);
 
     if (doc.__dirty && !doc.__isSaving) {
       
