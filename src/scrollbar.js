@@ -85,9 +85,12 @@ var Scrollbar = React.createClass({
      
      var scrollTop = $(self.panelContentEl).scrollTop();
 
+     var highlights = [];
      // Compute highlights
-     var highlights = this.props.highlights.map(function(nodeId) {
+     this.props.highlights.forEach(function(nodeId) {
        var nodeEl = $(self.panelContentEl).find('*[data-id='+nodeId+']');
+       if (!nodeEl.length) return;
+
        var top = nodeEl.position().top / self.factor;
        var height = nodeEl.outerHeight(true) / self.factor;
 
@@ -102,7 +105,7 @@ var Scrollbar = React.createClass({
          top: top,
          height: height
        }
-       return data;
+       highlights.push(data);
      });
 
      var thumbProps = {
@@ -118,6 +121,7 @@ var Scrollbar = React.createClass({
 
   render: function() {
     var highlightEls = this.state.highlights.map(function(h) {
+
      return $$('div', {
         className: 'highlight',
         key: h.id,
