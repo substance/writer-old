@@ -44,9 +44,11 @@ var Writer = React.createClass({
   },
 
   componentDidMount: function() {
-    setInterval(function() {
-      this.requestAutoSave();
-    }.bind(this), 10000);
+    if (!window.devMode) {
+      setInterval(function() {
+        this.requestAutoSave();
+      }.bind(this), 10000);      
+    }
   },
 
   requestAutoSave: function() {
