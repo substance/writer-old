@@ -3,7 +3,8 @@ var $$ = React.createElement;
 var ICONS_FOR_TYPE = {
   "error": "fa-exclamation-circle",
   "info": "fa-info",
-  "progress": "fa-exchange"
+  "progress": "fa-exchange",
+  "success": "fa-check-circle",
 };
 
 // The Status Bar
