@@ -44,9 +44,9 @@ var Writer = React.createClass({
   },
 
   componentDidMount: function() {
-    // setInterval(function() {
-    //   this.requestAutoSave();
-    // }.bind(this), 2000);
+    setInterval(function() {
+      this.requestAutoSave();
+    }.bind(this), 10000);
   },
 
   requestAutoSave: function() {
@@ -60,7 +60,7 @@ var Writer = React.createClass({
     if (doc.__dirty && !doc.__isSaving) {
       
       notifications.addMessage({
-        type: "progress",
+        type: "info",
         message: "Autosaving ..."
       });
 
@@ -68,8 +68,17 @@ var Writer = React.createClass({
       backend.saveDocument(doc, function(err) {
         doc.__isSaving = false;
         if (err) {
+          notifications.addMessage({
+            type: "error",
+            message: err.message || err.toString()
+          });
           console.err('saving of document failed');
         } else {
+          doc.emit('document:saved');
+          notifications.addMessage({
+            type: "info",
+            message: "No changes"
+          });
           doc.__dirty = false;
         }
       });
