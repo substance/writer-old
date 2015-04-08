@@ -21,6 +21,8 @@ var WriterController = function(opts) {
     'transaction:started': this.transactionStarted,
     'document:changed': this.onDocumentChanged
   });
+
+
 };
 
 WriterController.Prototype = function() {
@@ -57,11 +59,6 @@ WriterController.Prototype = function() {
   };
 
   this.onSelectionChanged = function(sel) {
-    // console.log('selection changed', sel);
-
-    // var range = sel.getTextRange();
-    // var annotations = this.doc.annotationIndex.get(sel.getPath(), range[0], range[1]);
-
     var modules = this.getModules();
     var handled = false;
     for (var i = 0; i < modules.length && !handled; i++) {
@@ -73,6 +70,8 @@ WriterController.Prototype = function() {
   };
 
   this.onDocumentChanged = function(change, info) {
+    this.doc.__dirty = true;
+
     if (info.replay) {
       this.replaceState(change.after.state);
       var self = this;
@@ -212,8 +211,6 @@ WriterController.Prototype = function() {
 
 
 Substance.inherit(WriterController, Substance.EventEmitter);
-
-// Substance.initClass(WriterController);
 
 Object.defineProperty(WriterController.prototype, 'state', {
   get: function() {

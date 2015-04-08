@@ -12,6 +12,10 @@ var WriterController = require("./writer_controller");
 var Writer = React.createClass({
   displayName: "Writer",
 
+  contextTypes: {
+    backend: React.PropTypes.object.isRequired
+  },
+
   getInitialState: function() {
     return {"contextId": "subjects"};
   },
@@ -38,7 +42,30 @@ var Writer = React.createClass({
   },
 
   componentDidMount: function() {
-    // $(this.getDOMNode()).on('click', '.reference', this.handleReferenceToggle);
+    // setInterval(function() {
+    //   this.requestAutoSave();
+    // }.bind(this), 2000);
+  },
+
+  requestAutoSave: function() {
+    var doc = this.props.doc;
+    var self = this;
+    var backend = this.context.backend;
+
+    console.log('autosaving... doc is dirty:', doc.__dirty);
+
+    if (doc.__dirty && !doc.__isSaving) {
+      console.log('autosaving doc');
+      doc.__isSaving = true;
+      backend.saveDocument(doc, function(err) {
+        doc.__isSaving = false;
+        if (err) {
+          console.err('saving of document failed');
+        } else {
+          doc.__dirty = false;
+        }
+      });
+    }
   },
 
   // E.g. when a tool requests a context switch
@@ -54,29 +81,6 @@ var Writer = React.createClass({
     var newContext = $(e.currentTarget).attr("data-id");
     this.handleContextSwitch(newContext);
   },
-
-  // Handle click on a reference within the document
-  // handleReferenceToggle: function(e) {
-  //   e.preventDefault();
-
-  //   var referenceId = $(e.currentTarget).attr("data-id");
-  //   var reference = this.props.doc.get(referenceId);
-  //   // Skip for non reference toggles
-  //   if (!reference) return;
-
-  //   var modules = this.writerCtrl.getModules();
-  //   var handled = false;
-  //   for (var i = 0; i < modules.length && !handled; i++) {
-  //     var stateHandlers = modules[i].stateHandlers;
-  //     if (stateHandlers && stateHandlers.handleReferenceToggle) {
-  //       handled = stateHandlers.handleReferenceToggle(this.writerCtrl, reference);
-  //     }
-  //   }
-
-  //   if (!handled) {
-  //     console.error("this reference type could not be handled:", reference.type);
-  //   }
-  // },
 
   // Rendering
   // ----------------
