@@ -22,7 +22,6 @@ var WriterController = function(opts) {
     'document:changed': this.onDocumentChanged
   });
 
-
 };
 
 WriterController.Prototype = function() {
@@ -71,6 +70,12 @@ WriterController.Prototype = function() {
 
   this.onDocumentChanged = function(change, info) {
     this.doc.__dirty = true;
+    var notifications = this.writerComponent.context.notifications;
+
+    notifications.addMessage({
+      type: "info",
+      message: "Unsaved changes"
+    });
 
     if (info.replay) {
       this.replaceState(change.after.state);

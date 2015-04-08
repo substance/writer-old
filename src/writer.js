@@ -6,6 +6,8 @@ var ContentTools = require("./content_tools");
 var ContentPanel = require("./content_panel");
 var WriterController = require("./writer_controller");
 
+var StatusBar = require("./status_bar");
+
 // The Substance Writer Component
 // ----------------
 
@@ -13,7 +15,8 @@ var Writer = React.createClass({
   displayName: "Writer",
 
   contextTypes: {
-    backend: React.PropTypes.object.isRequired
+    backend: React.PropTypes.object.isRequired,
+    notifications: React.PropTypes.object.isRequired
   },
 
   getInitialState: function() {
@@ -31,8 +34,7 @@ var Writer = React.createClass({
       writerComponent: this,
       config: this.props.config
     });
-  }, 
-
+  },
 
   shouldComponentUpdate: function(nextProps, nextState) {
     if (Substance.isEqual(this.state, nextState)) {
@@ -51,11 +53,17 @@ var Writer = React.createClass({
     var doc = this.props.doc;
     var self = this;
     var backend = this.context.backend;
+    var notifications = this.context.notifications;
 
     console.log('autosaving... doc is dirty:', doc.__dirty);
 
     if (doc.__dirty && !doc.__isSaving) {
-      console.log('autosaving doc');
+      
+      notifications.addMessage({
+        type: "progress",
+        message: "Autosaving ..."
+      });
+
       doc.__isSaving = true;
       backend.saveDocument(doc, function(err) {
         doc.__isSaving = false;
@@ -146,8 +154,11 @@ var Writer = React.createClass({
       ),
       $$('div', {className: "resource-container"},
         this.createContextToggles(),
-        this.createContextPanel(this) // will be possibly be recycled
-      )
+        this.createContextPanel(this)
+      ),
+      $$(StatusBar, {
+        doc: this.props.doc
+      })
     );
   }
 });
