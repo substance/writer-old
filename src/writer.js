@@ -35,7 +35,7 @@ var Writer = React.createClass({
   },
 
   getInitialState: function() {
-    return {"contextId": "entities"};
+    return {"contextId": "editSubjectReference", "subjectReferenceId": "subject_reference_1"};
   },
 
   // Events
@@ -125,12 +125,16 @@ var Writer = React.createClass({
     var self = this;
 
     var panelComps = panels.map(function(panelClass) {
-      // We don't show dialogs here
-      if (panelClass.isDialog) return null;
+      // We don't show inactive here
+      if (panelClass.isDialog && panelClass.contextId !== contextId) return null;
 
       var className = ["toggle-context"];
       if (panelClass.contextId === contextId) {
         className.push("active");
+      }
+
+      if (panelClass.isDialog) {
+        className.push("dialog");
       }
 
       return $$('a', {
