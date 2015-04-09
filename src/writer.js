@@ -19,6 +19,21 @@ var Writer = React.createClass({
     notifications: React.PropTypes.object.isRequired
   },
 
+  childContextTypes: {
+    // used by text properties to render 'active' annotations
+    // For active container annotations annotation fragments are inserted
+    // which can be used to highlight the associated range
+    getHighlightedNodes: React.PropTypes.func,
+    getActiveContainerAnnotations: React.PropTypes.func
+  },
+
+  getChildContext: function() {
+    return {
+      getHighlightedNodes: this.getHighlightedNodes,
+      getActiveContainerAnnotations: this.getActiveContainerAnnotations,
+    };
+  },
+
   getInitialState: function() {
     return {"contextId": "subjects"};
   },
@@ -49,18 +64,17 @@ var Writer = React.createClass({
     if (!window.devMode) {
       setInterval(function() {
         this.requestAutoSave();
-      }.bind(this), 10000);      
+      }.bind(this), 10000);
     }
   },
 
   requestAutoSave: function() {
     var doc = this.props.doc;
-    var self = this;
     var backend = this.context.backend;
     var notifications = this.context.notifications;
 
     if (doc.__dirty && !doc.__isSaving) {
-      
+
       notifications.addMessage({
         type: "info",
         message: "Autosaving ..."
@@ -171,7 +185,16 @@ var Writer = React.createClass({
         doc: this.props.doc
       })
     );
-  }
+  },
+
+  getHighlightedNodes: function() {
+    return this.writerCtrl.getHighlightedNodes();
+  },
+
+  getActiveContainerAnnotations: function() {
+    return this.writerCtrl.getActiveContainerAnnotations();
+  },
+
 });
 
 module.exports = Writer;

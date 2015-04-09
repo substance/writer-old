@@ -180,6 +180,11 @@ WriterController.Prototype = function() {
     return highlightedNodes || [];
   };
 
+  this.getActiveContainerAnnotations = function() {
+    // TODO: Michael: please give me a hash or an array
+    // of active container annotation ids.
+  };
+
   this.deleteAnnotation = function(annotationId) {
     var anno = this.doc.get(annotationId);
     var tx = this.doc.startTransaction({ selection: this.getSelection() });
