@@ -193,7 +193,7 @@ var Writer = React.createClass({
 
   getActiveContainerAnnotations: function() {
     return this.writerCtrl.getActiveContainerAnnotations();
-  },
+  }
 
 });
 

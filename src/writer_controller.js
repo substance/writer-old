@@ -181,8 +181,15 @@ WriterController.Prototype = function() {
   };
 
   this.getActiveContainerAnnotations = function() {
-    // TODO: Michael: please give me a hash or an array
-    // of active container annotation ids.
+    var modules = this.getModules();
+    var activeContainerAnnotations = null;
+    for (var i = 0; i < modules.length && !activeContainerAnnotations; i++) {
+      var stateHandlers = modules[i].stateHandlers;
+      if (stateHandlers && stateHandlers.getActiveContainerAnnotations) {
+        activeContainerAnnotations = stateHandlers.getActiveContainerAnnotations(this);
+      }
+    }
+    return activeContainerAnnotations || [];
   };
 
   this.deleteAnnotation = function(annotationId) {
