@@ -108,6 +108,11 @@ var Writer = React.createClass({
     });
   },
 
+  handleCloseDialog: function() {
+    console.log('handling close');
+    this.replaceState(this.getInitialState());
+  },
+
   // Triggered by Writer UI
   handleContextToggle: function(e) {
     e.preventDefault();
@@ -134,18 +139,31 @@ var Writer = React.createClass({
       }
 
       if (panelClass.isDialog) {
-        className.push("dialog");
+        return $$('div', {
+          className: 'dialog '+ contextId,
+          href: "#",
+          key: panelClass.contextId,
+          "data-id": panelClass.contextId
+        },
+          panelClass.displayName,
+          $$('a', {
+            href: "#",
+            onClick: this.handleCloseDialog,
+            className: "close-dialog",
+            dangerouslySetInnerHTML: {__html: '<i class="fa fa-close"></i> '}
+          })
+        );
+      } else {
+        return $$('a', {
+          className: className.join(" "),
+          href: "#",
+          key: panelClass.contextId,
+          "data-id": panelClass.contextId,
+          onClick: self.handleContextToggle,
+          dangerouslySetInnerHTML: {__html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.displayName}
+        });
       }
-
-      return $$('a', {
-        className: className.join(" "),
-        href: "#",
-        key: panelClass.contextId,
-        "data-id": panelClass.contextId,
-        onClick: self.handleContextToggle,
-        dangerouslySetInnerHTML: {__html: '<i class="fa '+panelClass.icon+'"></i> '+panelClass.displayName}
-      });
-    });
+    }.bind(this));
 
     return $$('div', {className: "context-toggles"},
       Substance.compact(panelComps)
