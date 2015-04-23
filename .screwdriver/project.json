@@ -1,0 +1,34 @@
+{
+  "modules": [
+    {
+      "repository": "https://github.com/substance/substance.git",
+      "folder": "node_modules/substance",
+      "branch": "master"
+    },
+    {
+      "repository": "https://github.com/substance/cjs.git",
+      "folder": "node_modules/substance-cjs",
+      "branch": "master"
+    }
+  ],
+  "node_modules": {
+  },
+  "npm": {
+    "engines": {
+      "node": ">=0.8.x",
+      "npm": ">=1.1.x"
+    }
+  },
+  "styles": {
+  },
+  "assets": {
+    "styles": "styles",
+    "lib": "lib"
+  },
+  "bundle": {
+    "name": "substance-writer",
+    "folder": "./dist",
+    "source": "./boot.js",
+    "index": "./index.html"
+  }
+}
