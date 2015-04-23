@@ -21,7 +21,7 @@ var config = require("./.screwdriver/project.json");
 new CJSServer(app, __dirname, 'lens')
   // ATTENTION: the second argument is the script which is resembled by injecting a list
   // of script tags instead. It must be exactly the same string which is used in the script src.
-  .scripts('./boot.js', 'substance_composer.js', {
+  .scripts('./boot.js', 'substance-writer.js', {
     // ignores: [
     //   'substance-commander',
     //   'substance-chronicle',
@@ -29,7 +29,7 @@ new CJSServer(app, __dirname, 'lens')
     // ]
   })
   // ... the same applies to the css file
-  .styles(config.styles, 'composer.css')
+  .styles(config.styles, 'writer.css')
   .page('/', './index.html');
 
 
